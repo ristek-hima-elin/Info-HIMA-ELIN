@@ -1,0 +1,1624 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HIMA ELIN PENS - Papan Informasi Poster Digital</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome untuk Ikon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#FF0000', // Merah Identitas HIMA ELIN
+                        primaryHover: '#D40000',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Kustomisasi scrollbar halus */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #FFF1F1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #FF0000;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #CC0000;
+        }
+        
+        /* Animasi Modal */
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.95) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .modal-animate {
+            animation: modalFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+    </style>
+</head>
+<body class="bg-[#FFF5F5] text-slate-900 font-sans antialiased min-h-screen flex flex-col">
+
+    <!-- Notifikasi Toast (Pengganti alert) -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- Top Accent Bar Identitas Kampus -->
+    <div class="bg-[#FF0000] text-white text-[11px] sm:text-xs py-1.5 px-4 border-b border-red-700 shadow-sm">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center gap-2 font-bold tracking-wide">
+                <i class="fa-solid fa-bolt text-amber-300"></i>
+                <span>Teknik Elektro Industri (PENS)</span>
+            </div>
+            <span class="text-white/90 hidden sm:inline font-medium">Departemen Teknik Elektro — Prodi Teknik Elektro Industri</span>
+        </div>
+    </div>
+
+    <!-- Header / Navbar -->
+    <header class="bg-white/95 backdrop-blur-md border-b-2 border-[#FF0000]/20 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <!-- Logo & Judul (Dapat diketuk 5x dengan cepat untuk membuka Login Admin di HP/Desktop) -->
+                <div id="brand-logo-trigger" onclick="handleSecretLogoTap()" class="flex items-center gap-3.5 cursor-pointer select-none group" title="HIMA ELIN PENS InfoHub">
+                    <!-- Logo Resmi HIMA ELIN PENS -->
+                <div class="w-20 h-20 rounded-2xl bg-white group-active:scale-95 transition-transform flex items-center justify-center shadow-md shadow-red-500/20 border border-red-200 shrink-0 relative overflow-hidden">
+                  <img src="logo-hima-elin.jpg" alt="Logo HIMA ELIN PENS" class="w-full h-full object-contain p-1">
+            </div>
+                    <div>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
+                                HIMA <span class="text-[#FF0000]">ELIN</span> PENS
+                            </h1>
+                            <span class="text-[11px] font-bold uppercase tracking-wider bg-[#FF0000] text-white px-2.5 py-0.5 rounded-full shadow-sm">
+                                Departemen RISTEK
+                            </span>
+                        </div>
+                        <p class="text-xs sm:text-sm text-slate-600 font-medium mt-0.5">
+                            Riset &amp; Teknologi • Himpunan Mahasiswa Elektro Industri PENS
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Kontrol Admin (Sepenuhnya tersembunyi di tampilan publik sampai Admin Login) -->
+                <div id="admin-toolbar" class="hidden flex-wrap items-center gap-2 self-start md:self-auto">
+                    <span id="storage-badge" class="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg bg-red-50 text-red-700 border border-red-200">
+                        <span class="w-2 h-2 rounded-full bg-amber-500"></span> Lokal Browser
+                    </span>
+                    <button onclick="openPosterFormModal()" class="inline-flex items-center gap-2 bg-[#FF0000] hover:bg-[#D40000] text-white text-sm font-semibold px-4 py-2.5 rounded-xl shadow-md shadow-red-500/25 transition-all active:scale-95">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>Tambah Poster</span>
+                    </button>
+                    <button onclick="openDataSyncModal()" class="inline-flex items-center gap-2 bg-red-50 hover:bg-red-100 text-red-800 border border-red-200 text-sm font-medium px-3.5 py-2.5 rounded-xl transition">
+                        <i class="fa-solid fa-cloud-arrow-up text-[#FF0000]"></i>
+                        <span class="hidden sm:inline">Database & Cloud Sync</span>
+                    </button>
+                    <button onclick="logoutAdmin()" title="Keluar Mode Admin & Lihat Tampilan Publik" class="inline-flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white text-sm font-medium px-3.5 py-2.5 rounded-xl transition">
+                        <i class="fa-solid fa-eye"></i>
+                        <span>Pratinjau Publik</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Banner Status Mode Admin (Muncul hanya saat admin login) -->
+    <div id="admin-status-banner" class="hidden bg-red-900 text-white text-xs py-2.5 px-4 border-b border-red-800">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 bg-[#FF0000] text-white rounded font-semibold uppercase tracking-wider text-[10px]">Admin Departemen RISTEK</span>
+                <span>Pengunjung publik tidak melihat kontrol ini. Anda dapat mengelola poster riset/informasi, password, &amp; sinkronisasi cloud.</span>
+            </div>
+            <div class="flex items-center gap-3 shrink-0">
+                <button onclick="openDataSyncModal()" class="text-red-200 hover:text-white underline">
+                    <i class="fa-solid fa-key mr-1"></i> Ubah Password Admin
+                </button>
+                <span class="text-red-500">|</span>
+                <button onclick="resetDataDemo()" class="text-red-200 hover:text-white underline">
+                    <i class="fa-solid fa-rotate-left mr-1"></i> Reset Data Contoh
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bagian Pencarian & Filter Kategori -->
+    <section class="bg-[#FFEBEB] border-b border-red-200/80 py-5">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                <!-- Filter Pills -->
+                <div class="flex items-center gap-2 overflow-x-auto pb-2 lg:pb-0 no-scrollbar" id="category-filters">
+                    <button data-category="Semua" class="filter-btn active px-4 py-2 rounded-xl text-sm font-semibold bg-[#FF0000] text-white shadow-sm shadow-red-500/30 transition whitespace-nowrap">
+                        Semua Informasi
+                    </button>
+                    <button data-category="Seminar/Workshop" class="filter-btn px-4 py-2 rounded-xl text-sm font-medium bg-white text-slate-700 hover:bg-red-50 hover:text-[#FF0000] transition whitespace-nowrap border border-red-200">
+                        Seminar & Pelatihan
+                    </button>
+                    <button data-category="Lomba" class="filter-btn px-4 py-2 rounded-xl text-sm font-medium bg-white text-slate-700 hover:bg-red-50 hover:text-[#FF0000] transition whitespace-nowrap border border-red-200">
+                        Lomba & Kompetisi
+                    </button>
+                    <button data-category="Lowongan/Magang" class="filter-btn px-4 py-2 rounded-xl text-sm font-medium bg-white text-slate-700 hover:bg-red-50 hover:text-[#FF0000] transition whitespace-nowrap border border-red-200">
+                        KP, Magang & Karir
+                    </button>
+                    <button data-category="Pengumuman" class="filter-btn px-4 py-2 rounded-xl text-sm font-medium bg-white text-slate-700 hover:bg-red-50 hover:text-[#FF0000] transition whitespace-nowrap border border-red-200">
+                        Info HIMA & Akademik
+                    </button>
+                </div>
+
+                <!-- Kolom Pencarian -->
+                <div class="relative w-full lg:w-80">
+                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-red-400">
+                        <i class="fa-solid fa-magnifying-glass text-sm"></i>
+                    </div>
+                    <input type="text" id="search-input" placeholder="Cari info kegiatan, lomba, atau CP..." 
+                        class="w-full pl-10 pr-4 py-2.5 bg-white border border-red-200 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#FF0000]/20 focus:border-[#FF0000] transition">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Konten Utama: Grid Galeri Poster -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Info Jumlah Hasil -->
+        <div class="flex items-center justify-between mb-6">
+            <p class="text-sm text-slate-600">
+                Menampilkan <span id="poster-count" class="font-bold text-[#FF0000]">0</span> poster informasi aktif
+            </p>
+            <div class="text-xs text-slate-600 hidden sm:flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-lg border border-red-200 shadow-sm">
+                <i class="fa-regular fa-hand-pointer text-[#FF0000]"></i> Klik poster untuk deskripsi, kontak CP & tautan pendaftaran
+            </div>
+        </div>
+
+        <!-- Grid Container -->
+        <div id="poster-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <!-- Kartu poster akan di-render melalui JavaScript -->
+        </div>
+
+        <!-- State Kosong (Jika pencarian tidak ditemukan) -->
+        <div id="empty-state" class="hidden text-center py-16 px-4 bg-white rounded-2xl border border-dashed border-red-300">
+            <div class="w-16 h-16 bg-red-50 text-[#FF0000] rounded-full flex items-center justify-center mx-auto mb-4 text-2xl border border-red-200">
+                <i class="fa-regular fa-folder-open"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-900 mb-1">Tidak ada poster ditemukan</h3>
+            <p class="text-sm text-slate-500 max-w-md mx-auto mb-6">Coba ubah kata kunci pencarian atau pilih kategori lain untuk melihat informasi terbaru dari HIMA ELIN PENS.</p>
+            <button onclick="resetFilters()" class="px-4 py-2 bg-[#FF0000] text-white font-semibold text-sm rounded-xl hover:bg-[#D40000] transition shadow-sm">
+                Tampilkan Semua Poster
+            </button>
+        </div>
+    </main>
+
+    <!-- =====================================================================
+         BANNER BAWAH: JEMBATAN INFORMASI PORTAL RESMI (GAYA 4 KOLOM PENS)
+    ====================================================================== -->
+    <section class="bg-white border-t border-slate-200 mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 items-start">
+                
+                <!-- Kolom 1: Identitas Organisasi, Alamat & Kontak Resmi -->
+                <div class="lg:pt-12 space-y-5">
+                    <h2 class="text-xl font-normal text-slate-900 leading-snug">
+                        Himpunan Mahasiswa<br>
+                        Teknik Elektro Industri<br>
+                        <span class="text-sm font-semibold text-[#FF0000]">Departemen RISTEK — PENS</span>
+                    </h2>
+
+                    <div class="text-[13px] text-slate-500 leading-relaxed space-y-0.5">
+                        <p>Gedung D3 / D4 Kampus PENS</p>
+                        <p>Jalan Raya ITS Sukolilo</p>
+                        <p>Surabaya</p>
+                        <p>60111</p>
+                    </div>
+
+                    <div class="text-[13px] text-slate-500 leading-relaxed space-y-0.5">
+                        <p>Institusi: Politeknik Elektronika Negeri Surabaya</p>
+                        <p>Instagram: @himaelinpens</p>
+                        <p>YouTube: @HIMAELINPENS</p>
+                        <p>Email: himaelin@pens.ac.id</p>
+                    </div>
+                </div>
+
+                <!-- Kolom 2: Departemen & Portal Akademik PENS -->
+                <div class="space-y-8 text-[13px]">
+                    <ul class="space-y-2.5">
+                        <li>
+                            <a href="https://elin.pens.ac.id" target="_blank" rel="noopener noreferrer" class="text-sky-600 hover:text-[#FF0000] hover:underline transition-colors">
+                                Teknik Elektro Industri PENS
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.pens.ac.id" target="_blank" rel="noopener noreferrer" class="text-sky-600 hover:text-[#FF0000] hover:underline transition-colors">
+                                Politeknik Elektronika Negeri Surabaya
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://kemahasiswaan.pens.ac.id/himpunan-mahasiswa-elektro-industri/" target="_blank" rel="noopener noreferrer" class="text-sky-600 hover:text-[#FF0000] hover:underline transition-colors">
+                                Profil &amp; Filosofi HIMA ELIN PENS
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://kemahasiswaan.pens.ac.id" target="_blank" rel="noopener noreferrer" class="text-sky-600 hover:text-[#FF0000] hover:underline transition-colors">
+                                Unit Kemahasiswaan PENS
+                            </a>
+                        </li>
+                    </ul>
+
+                    <ul class="space-y-2.5">
+                        <li>
+                            <a href="https://lecturer.pens.ac.id" target="_blank" rel="noopener noreferrer" class="text-sky-600 hover:text-[#FF0000] hover:underline transition-colors">
+                                Website Dosen
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://student.pens.ac.id" target="_blank" rel="noopener noreferrer" class="text-sky-600 hover:text-[#FF0000] hover:underline transition-colors">
+                                Website Mahasiswa
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Kolom 3: Sistem Informasi & Layanan Kampus -->
+                <div class="text-[13px]">
+                    <ul class="space-y-2.5">
+                        <li>
+                            <a href="https://online.mis.pens.ac.id" target="_blank" rel="noopener noreferrer" class="text-sky-600 hover:text-[#FF0000] hover:underline transition-colors">
+                                EEPIS Information System (Online MIS)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://ethol.pens.ac.id" target="_blank" rel="noopener noreferrer" class="text-sky-600 hover:text-[#FF0000] hover:underline transition-colors">
+                                ETHOL (Enterprise Technology Hybrid Online Learning)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://elearning.pens.ac.id" target="_blank" rel="noopener noreferrer" class="text-sky-600 hover:text-[#FF0000] hover:underline transition-colors">
+                                Elearning PENS
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://jas.pens.ac.id" target="_blank" rel="noopener noreferrer" class="text-sky-600 hover:text-[#FF0000] hover:underline transition-colors">
+                                Job Arrangement System (JAS PENS)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://p3m.pens.ac.id" target="_blank" rel="noopener noreferrer" class="text-sky-600 hover:text-[#FF0000] hover:underline transition-colors">
+                                Pusat Penelitian dan Pengabdian Masyarakat (P3M)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://pmb.pens.ac.id" target="_blank" rel="noopener noreferrer" class="text-sky-600 hover:text-[#FF0000] hover:underline transition-colors">
+                                Penerimaan Mahasiswa Baru PENS
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://repo.pens.ac.id" target="_blank" rel="noopener noreferrer" class="text-sky-600 hover:text-[#FF0000] hover:underline transition-colors">
+                                EEPIS Repository
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://lib.pens.ac.id" target="_blank" rel="noopener noreferrer" class="text-sky-600 hover:text-[#FF0000] hover:underline transition-colors">
+                                Perpustakaan PENS
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Kolom 4: Publikasi Ilmiah, Kompetisi & Kanal HIMA ELIN -->
+                <div class="space-y-8 text-[13px]">
+                    <ul class="space-y-2.5">
+                        <li>
+                            <a href="https://www.instagram.com/himaelinpens/" target="_blank" rel="noopener noreferrer" class="text-sky-600 hover:text-[#FF0000] hover:underline transition-colors">
+                                Instagram Resmi HIMA ELIN PENS
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.youtube.com/@HIMAELINPENS" target="_blank" rel="noopener noreferrer" class="text-sky-600 hover:text-[#FF0000] hover:underline transition-colors">
+                                Kanal YouTube HIMA ELIN PENS
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://ies.pens.ac.id" target="_blank" rel="noopener noreferrer" class="text-sky-600 hover:text-[#FF0000] hover:underline transition-colors">
+                                Industrial Electronics Seminar (IES)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://emitter.pens.ac.id" target="_blank" rel="noopener noreferrer" class="text-sky-600 hover:text-[#FF0000] hover:underline transition-colors">
+                                EMITTER Int. Journal of Eng. Tech.
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://pasca.pens.ac.id" target="_blank" rel="noopener noreferrer" class="text-sky-600 hover:text-[#FF0000] hover:underline transition-colors">
+                                Program Pasca Sarjana PENS
+                            </a>
+                        </li>
+                    </ul>
+
+                    <ul class="space-y-2.5">
+                        <li>
+                            <a href="https://kmipn.pens.ac.id" target="_blank" rel="noopener noreferrer" class="text-sky-600 hover:text-[#FF0000] hover:underline transition-colors">
+                                KMIPN (Kompetisi Mahasiswa Informatika Politeknik Nasional)
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.lapor.go.id" target="_blank" rel="noopener noreferrer" class="text-sky-600 hover:text-[#FF0000] hover:underline transition-colors">
+                                Layanan Aspirasi dan Pengaduan Online Rakyat
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer Identitas Departemen RISTEK HIMA ELIN PENS -->
+    <footer class="bg-slate-900 text-slate-300 border-t-4 border-[#FF0000]">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-7 flex flex-col md:flex-row items-center justify-between gap-4 text-sm">
+            <div class="flex items-center gap-3 text-center md:text-left">
+                <div class="w-10 h-10 rounded-xl bg-[#FF0000] text-white flex items-center justify-center shrink-0 shadow-md">
+                    <i class="fa-solid fa-microchip"></i>
+                </div>
+                <div>
+                    <p class="font-bold text-white tracking-wide">DEPARTEMEN RISTEK — HIMA ELIN PENS</p>
+                    <p class="text-xs text-slate-400">Riset dan Teknologi • Himpunan Mahasiswa Teknik Elektro Industri PENS</p>
+                </div>
+            </div>
+            <div class="text-center md:text-right text-xs text-slate-400 space-y-1">
+                <div class="flex flex-wrap items-center justify-center md:justify-end gap-3 text-slate-300 font-medium">
+                    <a href="https://www.pens.ac.id" target="_blank" rel="noopener noreferrer" class="hover:text-[#FF0000] transition">Portal Utama PENS</a>
+                    <span>•</span>
+                    <a href="https://elin.pens.ac.id" target="_blank" rel="noopener noreferrer" class="hover:text-[#FF0000] transition">Prodi ELIN</a>
+                    <span>•</span>
+                    <a href="https://kemahasiswaan.pens.ac.id/himpunan-mahasiswa-elektro-industri/" target="_blank" rel="noopener noreferrer" class="hover:text-[#FF0000] transition">Kemahasiswaan PENS</a>
+                </div>
+                <p class="text-slate-500">Kampus PENS, Jl. Raya ITS, Keputih, Sukolilo, Surabaya &copy; 2026 Dep. RISTEK HIMA ELIN PENS.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- =====================================================================
+         MODAL 1: DETAIL POSTER (Muncul saat kartu poster diklik)
+    ====================================================================== -->
+    <div id="detail-modal" class="fixed inset-0 z-40 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <!-- Backdrop -->
+        <div class="fixed inset-0 bg-slate-950/75 backdrop-blur-sm transition-opacity" onclick="closeDetailModal()"></div>
+
+        <div class="flex min-h-full items-center justify-center p-4 sm:p-6">
+            <div class="modal-animate relative w-full max-w-4xl bg-white rounded-2xl shadow-2xl overflow-hidden border border-red-200 flex flex-col md:flex-row">
+                
+                <!-- Tombol Close Pojok Kanan Atas -->
+                <button onclick="closeDetailModal()" class="absolute top-4 right-4 z-10 w-9 h-9 rounded-full bg-white/90 hover:bg-[#FF0000] text-slate-700 hover:text-white flex items-center justify-center shadow-md border border-slate-200 transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+
+                <!-- Sisi Kiri: Gambar Poster Ukuran Penuh -->
+                <div class="w-full md:w-1/2 bg-slate-900 flex items-center justify-center p-4 sm:p-6 relative">
+                    <img id="modal-poster-img" src="" alt="Poster Detail" class="max-h-[70vh] w-auto object-contain rounded-xl shadow-lg">
+                </div>
+
+                <!-- Sisi Kanan: Informasi, Deskripsi, Kontak & Tautan -->
+                <div class="w-full md:w-1/2 p-6 sm:p-8 flex flex-col justify-between max-h-[85vh] overflow-y-auto bg-white">
+                    <div>
+                        <!-- Badge Kategori & Tanggal -->
+                        <div class="flex flex-wrap items-center gap-2 mb-3">
+                            <span id="modal-poster-category" class="px-3 py-1 rounded-full text-xs font-semibold bg-red-50 text-[#FF0000] border border-red-200">
+                                Kategori
+                            </span>
+                            <span id="modal-poster-date" class="text-xs text-slate-500 flex items-center gap-1">
+                                <i class="fa-regular fa-calendar"></i> 15 Nov 2026
+                            </span>
+                        </div>
+
+                        <!-- Judul Lengkap -->
+                        <h2 id="modal-poster-title" class="text-xl sm:text-2xl font-bold text-slate-900 leading-snug mb-4">
+                            Judul Lengkap Poster
+                        </h2>
+
+                        <!-- Deskripsi Mendetail -->
+                        <div class="space-y-2 mb-6">
+                            <h4 class="text-xs font-bold uppercase tracking-wider text-[#FF0000]">Deskripsi Informasi</h4>
+                            <p id="modal-poster-desc" class="text-sm text-slate-700 leading-relaxed whitespace-pre-line">
+                                Deskripsi lengkap mengenai poster ini...
+                            </p>
+                        </div>
+
+                        <!-- Kartu Info Narahubung (Contact Person) -->
+                        <div class="bg-[#FFF5F5] rounded-xl p-4 border border-red-200 mb-6">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-[#FF0000]/10 text-[#FF0000] flex items-center justify-center shrink-0 border border-[#FF0000]/20">
+                                    <i class="fa-solid fa-user-tie"></i>
+                                </div>
+                                <div class="overflow-hidden">
+                                    <p class="text-xs text-slate-500">Narahubung / Contact Person</p>
+                                    <p id="modal-poster-cp" class="text-sm font-bold text-slate-900 truncate">Nama Narahubung</p>
+                                    <p id="modal-poster-phone-display" class="text-xs text-[#FF0000] font-mono font-semibold mt-0.5">+62 812-xxxx-xxxx</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tombol Aksi Langsung -->
+                    <div class="space-y-3 pt-4 border-t border-slate-100">
+                        <a id="modal-btn-wa" href="#" target="_blank" rel="noopener noreferrer" 
+                           class="w-full flex items-center justify-center gap-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm py-3 px-4 rounded-xl shadow-md shadow-emerald-600/20 transition-all active:scale-[0.99]">
+                            <i class="fa-brands fa-whatsapp text-lg"></i>
+                            <span>Hubungi Kontak (WhatsApp)</span>
+                        </a>
+
+                        <a id="modal-btn-link" href="#" target="_blank" rel="noopener noreferrer" 
+                           class="w-full flex items-center justify-center gap-2.5 bg-[#FF0000] hover:bg-[#D40000] text-white font-semibold text-sm py-3 px-4 rounded-xl shadow-md shadow-red-500/25 transition-all active:scale-[0.99]">
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                            <span>Kunjungi Tautan Informasi</span>
+                        </a>
+
+                        <!-- Opsi Edit & Hapus Poster (Hanya muncul saat Admin Login) -->
+                        <div id="modal-admin-actions" class="hidden pt-3 mt-2 border-t border-dashed border-slate-200 flex items-center justify-between gap-2">
+                            <button id="modal-btn-edit" type="button" class="flex-1 py-2 px-3 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 text-xs font-semibold inline-flex items-center justify-center gap-1.5 transition">
+                                <i class="fa-solid fa-pen-to-square"></i> Edit Poster
+                            </button>
+                            <button id="modal-btn-delete" type="button" class="flex-1 py-2 px-3 rounded-lg bg-red-50 hover:bg-red-100 text-red-700 border border-red-300 text-xs font-semibold inline-flex items-center justify-center gap-1.5 transition">
+                                <i class="fa-regular fa-trash-can"></i> Hapus Poster
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =====================================================================
+         MODAL 2: LOGIN ADMIN TERPROTEKSI
+    ====================================================================== -->
+    <div id="login-modal" class="fixed inset-0 z-50 hidden overflow-y-auto" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 bg-slate-950/75 backdrop-blur-sm transition-opacity" onclick="closeLoginModal()"></div>
+        <div class="flex min-h-full items-center justify-center p-4">
+            <div class="modal-animate relative w-full max-w-md bg-white rounded-2xl shadow-2xl border border-red-200 overflow-hidden">
+                <div class="p-6 sm:p-8">
+                    <div class="w-12 h-12 rounded-2xl bg-[#FF0000] text-white flex items-center justify-center text-xl mb-4 shadow-md shadow-red-500/30">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900">Login Admin Departemen RISTEK</h3>
+                    <p class="text-sm text-slate-600 mt-1">Masukkan kata sandi pengurus RISTEK untuk mengelola papan informasi poster HIMA ELIN PENS.</p>
+
+                    <!-- Petunjuk Password Demo -->
+                    <div class="mt-4 p-3 rounded-xl bg-red-50 border border-red-200 text-xs text-slate-700 flex items-start gap-2.5">
+                        <i class="fa-solid fa-circle-info mt-0.5 text-[#FF0000]"></i>
+                        <div>
+                            <span class="font-semibold text-slate-900">Info Uji Coba:</span> Kata sandi default demo adalah <code class="px-1.5 py-0.5 bg-white rounded border border-red-300 font-mono font-bold text-[#FF0000]">admin123</code> (dapat diubah di menu Database & Cloud Sync).
+                        </div>
+                    </div>
+
+                    <form id="login-form" class="mt-5 space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Kata Sandi Admin</label>
+                            <div class="relative">
+                                <input type="password" id="admin-password-input" required placeholder="Masukkan kata sandi..."
+                                    class="w-full pl-3.5 pr-10 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#FF0000]/20 focus:border-[#FF0000]">
+                                <button type="button" onclick="togglePasswordVisibility()" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-700">
+                                    <i id="eye-icon" class="fa-regular fa-eye text-sm"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-end gap-2.5 pt-2">
+                            <button type="button" onclick="closeLoginModal()" class="px-4 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 transition">
+                                Batal
+                            </button>
+                            <button type="submit" class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-[#FF0000] hover:bg-[#D40000] text-white shadow-md shadow-red-500/25 transition">
+                                Masuk Dashboard
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =====================================================================
+         MODAL 3: TAMBAH / EDIT POSTER (Dengan Kompresi Gambar Client-Side)
+    ====================================================================== -->
+    <div id="poster-form-modal" class="fixed inset-0 z-40 hidden overflow-y-auto" aria-labelledby="form-modal-title" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 bg-slate-950/75 backdrop-blur-sm transition-opacity" onclick="closePosterFormModal()"></div>
+
+        <div class="flex min-h-full items-center justify-center p-4 sm:p-6">
+            <div class="modal-animate relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl border border-red-200 overflow-hidden">
+                <!-- Header Modal -->
+                <div class="px-6 py-4 bg-[#FFF5F5] border-b border-red-200 flex items-center justify-between">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-lg bg-[#FF0000] text-white flex items-center justify-center shadow">
+                            <i id="form-modal-icon" class="fa-solid fa-plus"></i>
+                        </div>
+                        <div>
+                            <h3 id="form-modal-title" class="text-base font-bold text-slate-900">Tambah Poster Baru</h3>
+                            <p class="text-xs text-slate-500">Gambar otomatis dikompresi & tautan divalidasi sebelum disimpan.</p>
+                        </div>
+                    </div>
+                    <button onclick="closePosterFormModal()" class="w-8 h-8 rounded-lg hover:bg-red-100 text-slate-500 hover:text-[#FF0000] flex items-center justify-center transition">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                <!-- Form Input -->
+                <form id="poster-form" class="p-6 space-y-4 max-h-[82vh] overflow-y-auto">
+                    <input type="hidden" id="edit-poster-id" value="">
+
+                    <!-- Judul Poster -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1.5">Judul Poster / Kegiatan <span class="text-[#FF0000]">*</span></label>
+                        <input type="text" id="input-title" required placeholder="Contoh: Pelatihan PLC & SCADA Industri 2026 - HIMA ELIN PENS"
+                            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#FF0000]/20 focus:border-[#FF0000]">
+                    </div>
+
+                    <!-- Kategori -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1.5">Kategori Informasi <span class="text-[#FF0000]">*</span></label>
+                        <select id="input-category" required
+                            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#FF0000]/20 focus:border-[#FF0000]">
+                            <option value="Seminar/Workshop">Seminar & Pelatihan</option>
+                            <option value="Lomba">Lomba & Kompetisi</option>
+                            <option value="Lowongan/Magang">KP, Magang & Karir</option>
+                            <option value="Pengumuman">Info HIMA & Akademik</option>
+                        </select>
+                    </div>
+
+                    <!-- Unggah File Gambar (Kompresi Otomatis) ATAU URL Gambar -->
+                    <div class="bg-[#FFF5F5] p-4 rounded-xl border border-red-200 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <label class="block text-xs font-bold text-slate-800">Gambar Poster (Unggah File / URL) <span class="text-[#FF0000]">*</span></label>
+                            <span class="text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                                <i class="fa-solid fa-bolt mr-1"></i> Auto-Kompresi WebP/JPEG
+                            </span>
+                        </div>
+
+                        <!-- Dropzone Upload File Lokal -->
+                        <div class="relative border-2 border-dashed border-red-300 hover:border-[#FF0000] bg-white rounded-xl p-4 text-center transition cursor-pointer">
+                            <input type="file" id="input-image-file" accept="image/*" onchange="handleImageFileUpload(event)"
+                                class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                            <div class="text-slate-600 space-y-1">
+                                <i class="fa-solid fa-cloud-arrow-up text-2xl text-[#FF0000]"></i>
+                                <p class="text-xs font-semibold text-slate-800">Klik atau seret file poster dari perangkat Anda</p>
+                                <p class="text-[11px] text-slate-500">Otomatis di-resize maks. lebar 1000px & dikompresi 80% agar loading cepat</p>
+                            </div>
+                        </div>
+
+                        <!-- Indikator Hasil Kompresi Gambar -->
+                        <div id="compression-stats" class="hidden p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 flex items-center justify-between gap-2">
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-circle-check text-emerald-600 text-base"></i>
+                                <div>
+                                    <p class="font-semibold">Kompresi Gambar Berhasil!</p>
+                                    <p id="compression-detail" class="text-[11px] text-emerald-700">Ukuran awal: 2.4 MB → Hasil: 185 KB (Hemat 92%)</p>
+                                </div>
+                            </div>
+                            <img id="compression-preview-thumb" src="" alt="Preview" class="w-10 h-12 object-cover rounded border border-emerald-300 bg-white">
+                        </div>
+
+                        <!-- Atau Input URL Manual -->
+                        <div>
+                            <label class="block text-[11px] font-medium text-slate-600 mb-1">Atau tempel URL gambar eksternal / hasil kompresi:</label>
+                            <input type="text" id="input-image" required placeholder="https://contoh.com/poster.jpg atau otomatis terisi saat unggah file"
+                                class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs font-mono text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#FF0000]/20 focus:border-[#FF0000]">
+                        </div>
+
+                        <!-- Preset Cepat -->
+                        <div class="flex flex-wrap items-center gap-1.5 pt-1">
+                            <span class="text-[11px] text-slate-600 mr-1">Preset Contoh:</span>
+                            <button type="button" onclick="setPresetImage('tech')" class="text-[11px] px-2.5 py-1 rounded-lg bg-white hover:bg-red-50 text-slate-700 border border-red-200 transition">
+                                Poster Elektro/Otomasi
+                            </button>
+                            <button type="button" onclick="setPresetImage('design')" class="text-[11px] px-2.5 py-1 rounded-lg bg-white hover:bg-red-50 text-slate-700 border border-red-200 transition">
+                                Poster Lomba
+                            </button>
+                            <button type="button" onclick="setPresetImage('career')" class="text-[11px] px-2.5 py-1 rounded-lg bg-white hover:bg-red-50 text-slate-700 border border-red-200 transition">
+                                Poster Magang/KP
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Deskripsi -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1.5">Deskripsi Lengkap Poster <span class="text-[#FF0000]">*</span></label>
+                        <textarea id="input-desc" rows="3" required placeholder="Tuliskan detail waktu pelaksanaan, tempat (Gedung D3/D4 PENS), syarat, atau informasi penting..."
+                            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#FF0000]/20 focus:border-[#FF0000]"></textarea>
+                    </div>
+
+                    <!-- Grid 2 Kolom: Nama Narahubung & Nomor WhatsApp dengan Live Preview Normalisasi -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Nama Narahubung (CP) <span class="text-[#FF0000]">*</span></label>
+                            <input type="text" id="input-cp" required placeholder="Contoh: Mas Fajar (Kadep Ristek)"
+                                class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#FF0000]/20 focus:border-[#FF0000]">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Nomor WhatsApp <span class="text-[#FF0000]">*</span></label>
+                            <input type="tel" id="input-wa" required oninput="updateWaPreview()" placeholder="Contoh: 0812-3456-7890"
+                                class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#FF0000]/20 focus:border-[#FF0000]">
+                            <p id="wa-normalized-preview" class="text-[11px] text-emerald-600 font-mono mt-1">Format wa.me: -</p>
+                        </div>
+                    </div>
+
+                    <!-- Link Tautan Informasi dengan Validasi Otomatis -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1.5">Link Tautan Pendaftaran / Info Lengkap <span class="text-[#FF0000]">*</span></label>
+                        <input type="text" id="input-link" required oninput="updateUrlPreview()" placeholder="Contoh: intip.in/DaftarELIN atau https://pens.ac.id"
+                            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#FF0000]/20 focus:border-[#FF0000]">
+                        <p id="url-normalized-preview" class="text-[11px] text-slate-500 mt-1">Otomatis menambahkan protokol https:// jika belum ada.</p>
+                    </div>
+
+                    <!-- Tombol Submit -->
+                    <div class="pt-3 border-t border-slate-200 flex items-center justify-end gap-3">
+                        <button type="button" onclick="closePosterFormModal()" class="px-4 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 transition">
+                            Batal
+                        </button>
+                        <button type="submit" id="btn-submit-poster" class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-[#FF0000] hover:bg-[#D40000] text-white shadow-md shadow-red-500/25 transition">
+                            Simpan & Publikasikan Poster
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- =====================================================================
+         MODAL 4: PENGATURAN DATABASE CLOUD, BACKUP JSON & KEAMANAN ADMIN
+    ====================================================================== -->
+    <div id="sync-modal" class="fixed inset-0 z-50 hidden overflow-y-auto" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 bg-slate-950/75 backdrop-blur-sm transition-opacity" onclick="closeDataSyncModal()"></div>
+        <div class="flex min-h-full items-center justify-center p-4 sm:p-6">
+            <div class="modal-animate relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl border border-red-200 overflow-hidden">
+                <!-- Header -->
+                <div class="px-6 py-4 bg-[#FFF5F5] border-b border-red-200 flex items-center justify-between">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-lg bg-[#FF0000] text-white flex items-center justify-center shadow">
+                            <i class="fa-solid fa-database"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-bold text-slate-900">Database Cloud, Backup & Keamanan</h3>
+                            <p class="text-xs text-slate-500">Kelola penyimpanan terpusat agar data tersinkronisasi lintas perangkat.</p>
+                        </div>
+                    </div>
+                    <button onclick="closeDataSyncModal()" class="w-8 h-8 rounded-lg hover:bg-red-100 text-slate-500 hover:text-[#FF0000] flex items-center justify-center transition">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                <div class="p-6 space-y-6 max-h-[82vh] overflow-y-auto">
+                    <!-- Bagian 1: Ekspor & Impor JSON (Backup Portabel) -->
+                    <div class="space-y-2.5">
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-[#FF0000]">1. Cadangan Data Portabel (JSON Backup)</h4>
+                        <p class="text-xs text-slate-600">Unduh seluruh data poster menjadi file <code class="bg-red-50 px-1 rounded text-[#FF0000] font-semibold">.json</code> untuk cadangan atau memindahkan data ke server lain.</p>
+                        <div class="flex flex-wrap gap-3 pt-1">
+                            <button type="button" onclick="exportDataJSON()" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition">
+                                <i class="fa-solid fa-download"></i> Ekspor / Unduh JSON
+                            </button>
+                            <label class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-red-50 hover:bg-red-100 text-red-800 border border-red-200 text-xs font-semibold cursor-pointer transition">
+                                <i class="fa-solid fa-upload text-[#FF0000]"></i> Impor File JSON
+                                <input type="file" accept=".json" onchange="importDataJSON(event)" class="hidden">
+                            </label>
+                        </div>
+                    </div>
+
+                    <hr class="border-slate-200">
+
+                    <!-- Bagian 2: Konfigurasi Cloud Sync (Supabase REST / Google Apps Script Webhook) -->
+                    <form id="cloud-config-form" class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <h4 class="text-xs font-bold uppercase tracking-wider text-[#FF0000]">2. Integrasi Database Cloud (Opsional)</h4>
+                            <span class="text-[11px] text-slate-500 font-medium">Mendukung Supabase REST / Apps Script</span>
+                        </div>
+                        <p class="text-xs text-slate-600">Hubungkan endpoint API agar setiap perubahan poster otomatis tersimpan ke server pusat.</p>
+                        
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Endpoint URL API / Webhook</label>
+                            <input type="url" id="cloud-endpoint-url" placeholder="https://xyzcompany.supabase.co/rest/v1/posters atau URL Google Apps Script"
+                                class="w-full px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-mono text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#FF0000]">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">API Key / Bearer Token (Jika menggunakan Supabase/REST)</label>
+                            <input type="password" id="cloud-api-key" placeholder="Masukkan anon key / token otorisasi..."
+                                class="w-full px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-mono text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#FF0000]">
+                        </div>
+
+                        <div class="flex flex-wrap items-center gap-2.5 pt-1">
+                            <button type="submit" class="px-4 py-2 rounded-xl bg-[#FF0000] hover:bg-[#D40000] text-white text-xs font-semibold transition">
+                                Simpan Konfigurasi Cloud
+                            </button>
+                            <button type="button" onclick="syncWithCloud(true)" class="px-4 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 text-xs font-semibold transition">
+                                <i class="fa-solid fa-arrows-rotate mr-1"></i> Uji & Sinkronkan Sekarang
+                            </button>
+                        </div>
+                    </form>
+
+                    <hr class="border-slate-200">
+
+                    <!-- Bagian 3: Ubah Password Admin -->
+                    <form id="change-password-form" class="space-y-3">
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-[#FF0000]">3. Keamanan Akses Pengurus</h4>
+                        <div class="flex flex-col sm:flex-row gap-2.5">
+                            <input type="password" id="new-admin-password" minlength="4" required placeholder="Masukkan kata sandi admin baru (min. 4 karakter)"
+                                class="flex-grow px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#FF0000]">
+                            <button type="submit" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shrink-0 transition">
+                                Perbarui Password
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =====================================================================
+         JAVASCRIPT LOGIKA APLIKASI (HIMA ELIN PENS EDITION)
+    ====================================================================== -->
+    <script>
+        // Helper untuk membuat SVG Poster Ilustratif bertema Elektro Industri PENS
+        function createPosterSVG(bgGradientStart, bgGradientEnd, badgeText, mainTitle, subTitle, accentColor) {
+            const svg = `
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 800" width="600" height="800">
+                <defs>
+                    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="${bgGradientStart}"/>
+                        <stop offset="100%" stop-color="${bgGradientEnd}"/>
+                    </linearGradient>
+                </defs>
+                <rect width="600" height="800" fill="url(#grad)"/>
+                <circle cx="520" cy="100" r="180" fill="${accentColor}" opacity="0.18"/>
+                <circle cx="80" cy="700" r="220" fill="${accentColor}" opacity="0.14"/>
+                <rect x="48" y="60" width="240" height="42" rx="21" fill="${accentColor}"/>
+                <text x="168" y="87" font-family="sans-serif" font-size="17" font-weight="bold" fill="#ffffff" text-anchor="middle">${badgeText}</text>
+                
+                <text x="48" y="210" font-family="sans-serif" font-size="46" font-weight="800" fill="#ffffff">${mainTitle[0] || ''}</text>
+                <text x="48" y="270" font-family="sans-serif" font-size="46" font-weight="800" fill="#ffffff">${mainTitle[1] || ''}</text>
+                <text x="48" y="330" font-family="sans-serif" font-size="46" font-weight="800" fill="${accentColor}">${mainTitle[2] || ''}</text>
+                
+                <line x1="48" y1="380" x2="180" y2="380" stroke="${accentColor}" stroke-width="6" stroke-linecap="round"/>
+                
+                <text x="48" y="440" font-family="sans-serif" font-size="22" fill="#f1f5f9">${subTitle[0] || ''}</text>
+                <text x="48" y="475" font-family="sans-serif" font-size="22" fill="#f1f5f9">${subTitle[1] || ''}</text>
+                
+                <rect x="48" y="560" width="504" height="160" rx="20" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.18)" stroke-width="2"/>
+                <text x="80" y="615" font-family="sans-serif" font-size="18" font-weight="bold" fill="${accentColor}">HIMA ELIN PENS • SURABAYA</text>
+                <text x="80" y="650" font-family="sans-serif" font-size="20" fill="#ffffff">Klik poster ini untuk melihat detail</text>
+                <text x="80" y="682" font-family="sans-serif" font-size="20" fill="#e2e8f0">narahubung &amp; tautan pendaftaran.</text>
+            </svg>`;
+            return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg);
+        }
+
+        // Data Awal Khas HIMA ELIN PENS
+        const defaultPosters = [
+            {
+                id: 1,
+                title: "Industrial Automation & PLC Training 2026 — HIMA ELIN PENS",
+                category: "Seminar/Workshop",
+                date: "18 Nov 2026",
+                image: createPosterSVG("#990000", "#FF0000", "PELATIHAN RISTEK", ["INDUSTRIAL", "AUTOMATION &", "PLC SCADA"], ["Hands-on pemrograman PLC,", "HMI & sistem kontrol industri."], "#FDE047"),
+                description: "Departemen Riset dan Teknologi HIMA ELIN PENS menyelenggarakan pelatihan intensif otomasi industri untuk mahasiswa Elektro Industri.\n\nMateri yang dipelajari:\n• Pemrograman Ladder Diagram PLC Siemens & Omron\n• Integrasi sensor industri & aktuator pneumatik\n• Perancangan antarmuka SCADA real-time\n\nLokasi: Laboratorium Sistem Kontrol & Otomasi Gedung D4 PENS.\nKuota terbatas untuk 40 peserta!",
+                cpName: "Mas Dimas (Kadep Ristek HIMA ELIN)",
+                whatsapp: "6281234567890",
+                link: "https://pens.ac.id"
+            },
+            {
+                id: 2,
+                title: "Info Kerja Praktik (KP) & Magang Industri: PT Schneider & Siemens",
+                category: "Lowongan/Magang",
+                date: "15 Nov 2026",
+                image: createPosterSVG("#1E293B", "#7F1D1D", "INFO KP & KARIR", ["MAGANG &", "KERJA PRAKTIK", "POWER SYSTEM"], ["Peluang KP semester genap", "bidang Power & Automation."], "#FF0000"),
+                description: "Informasi pembukaan program Kerja Praktik (KP) dan Magang Bersertifikat bagi mahasiswa D3 & D4 Teknik Elektro Industri PENS.\n\nBidang Penempatan:\n• Electrical Power Distribution & Protection\n• Industrial Automation & Drives\n• Energy Management & IoT Monitoring\n\nBerkas wajib: CV terbaru, Transkrip Nilai sementara, dan Surat Pengantar Jurusan.",
+                cpName: "Mbak Salsa (Dep. Hublu HIMA ELIN)",
+                whatsapp: "6285712345678",
+                link: "https://linkedin.com"
+            },
+            {
+                id: 3,
+                title: "ELIN Innovation Challenge (EIC) 2026 — Lomba Karya Teknologi Energi",
+                category: "Lomba",
+                date: "12 Nov 2026",
+                image: createPosterSVG("#CC0000", "#FF0000", "KOMPETISI NASIONAL", ["ELIN INNOVATION", "CHALLENGE", "2026 PENS"], ["Kompetisi inovasi efisiensi energi", "& smart grid tingkat nasional."], "#FEF08A"),
+                description: "Tunjukkan inovasi terbaik tim kamu dalam ajang tahunan ELIN Innovation Challenge (EIC) PENS 2026!\n\nSub-tema Kompetisi:\n• Renewable Energy & Smart Microgrid\n• Electric Vehicle (EV) Charging & Power Electronics\n• Smart Manufacturing & Predictive Maintenance\n\nTotal hadiah pembinaan puluhan juta rupiah + Trophy bergilir.",
+                cpName: "Arif Rahman (Ketua Pelaksana EIC)",
+                whatsapp: "6289611223344",
+                link: "https://pens.ac.id"
+            },
+            {
+                id: 4,
+                title: "Open Recruitment Panitia LKMM-TD & Pengurus HIMA ELIN Periode 2026/2027",
+                category: "Pengumuman",
+                date: "10 Nov 2026",
+                image: createPosterSVG("#450A0A", "#B91C1C", "INFO ORGANISASI", ["OPEN", "RECRUITMENT", "HIMA ELIN"], ["Mari berkontribusi nyata untuk", "Elektro Industri PENS!"], "#FF0000"),
+                description: "Panggilan bagi seluruh mahasiswa aktif Teknik Elektro Industri PENS angkatan 2025 & 2026 untuk bergabung menjadi bagian dari kepengurusan HIMA ELIN PENS.\n\nDepartemen yang dibuka:\n• Riset dan Teknologi (Ristek)\n• Pengembangan Sumber Daya Mahasiswa (PSDM)\n• Hubungan Luar (Hublu) & Kominfo\n• Kewirausahaan (KWU) & Kesejahteraan Mahasiswa",
+                cpName: "Sekretariat HIMA ELIN PENS",
+                whatsapp: "6281122334455",
+                link: "https://pens.ac.id"
+            }
+        ];
+
+        // State Aplikasi & Konfigurasi
+        const STORAGE_KEYS = {
+            POSTERS: "hima_elin_pens_posters_v3",
+            ADMIN_PASS: "hima_elin_admin_pass_v1",
+            ADMIN_SESSION: "hima_elin_admin_logged_in",
+            CLOUD_CONFIG: "hima_elin_cloud_config_v1"
+        };
+
+        let posters = [];
+        let currentCategory = "Semua";
+        let searchQuery = "";
+        let isAdminLoggedIn = false;
+        let cloudConfig = { endpointUrl: "", apiKey: "" };
+        let logoTapCount = 0;
+        let logoTapTimer = null;
+
+        // Inisialisasi saat halaman dimuat
+        document.addEventListener("DOMContentLoaded", () => {
+            loadAdminState();
+            loadCloudConfig();
+            loadPostersFromStorage();
+            setupEventListeners();
+            renderPosters();
+            checkSecretUrlTrigger();
+            
+            // Jika cloud terkonfigurasi, tarik data terbaru saat load
+            if (cloudConfig.endpointUrl) {
+                syncWithCloud(false);
+            }
+        });
+
+        // =================================================================
+        // 1. MANAJEMEN STEALTH ADMIN ACCESS & AUTENTIKASI
+        // =================================================================
+        function checkSecretUrlTrigger() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const isAdminParam = urlParams.get("admin") === "true";
+            const isAdminHash = window.location.hash.toLowerCase() === "#admin";
+
+            if ((isAdminParam || isAdminHash) && !isAdminLoggedIn) {
+                const cleanUrl = window.location.pathname;
+                window.history.replaceState({}, document.title, cleanUrl);
+                openLoginModal();
+            }
+        }
+
+        function handleSecretLogoTap() {
+            if (isAdminLoggedIn) return;
+            logoTapCount++;
+            clearTimeout(logoTapTimer);
+
+            if (logoTapCount >= 5) {
+                logoTapCount = 0;
+                openLoginModal();
+            } else {
+                logoTapTimer = setTimeout(() => {
+                    logoTapCount = 0;
+                }, 1500);
+            }
+        }
+
+        function loadAdminState() {
+            isAdminLoggedIn = sessionStorage.getItem(STORAGE_KEYS.ADMIN_SESSION) === "true";
+            updateAdminUI();
+        }
+
+        function getAdminPassword() {
+            return localStorage.getItem(STORAGE_KEYS.ADMIN_PASS) || "admin123";
+        }
+
+        function updateAdminUI() {
+            const adminToolbar = document.getElementById("admin-toolbar");
+            const adminBanner = document.getElementById("admin-status-banner");
+            const modalAdminActions = document.getElementById("modal-admin-actions");
+
+            if (isAdminLoggedIn) {
+                adminToolbar.classList.remove("hidden");
+                adminToolbar.classList.add("flex");
+                adminBanner.classList.remove("hidden");
+                if (modalAdminActions) modalAdminActions.classList.remove("hidden");
+            } else {
+                adminToolbar.classList.add("hidden");
+                adminToolbar.classList.remove("flex");
+                adminBanner.classList.add("hidden");
+                if (modalAdminActions) modalAdminActions.classList.add("hidden");
+            }
+            if (posters.length > 0) {
+                renderPosters();
+            }
+        }
+
+        function openLoginModal() {
+            document.getElementById("login-modal").classList.remove("hidden");
+            document.getElementById("admin-password-input").value = "";
+            setTimeout(() => document.getElementById("admin-password-input").focus(), 100);
+        }
+
+        function closeLoginModal() {
+            document.getElementById("login-modal").classList.add("hidden");
+        }
+
+        function togglePasswordVisibility() {
+            const input = document.getElementById("admin-password-input");
+            const icon = document.getElementById("eye-icon");
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.replace("fa-eye", "fa-eye-slash");
+            } else {
+                input.type = "password";
+                icon.classList.replace("fa-eye-slash", "fa-eye");
+            }
+        }
+
+        function handleLoginSubmit(e) {
+            e.preventDefault();
+            const enteredPass = document.getElementById("admin-password-input").value;
+            if (enteredPass === getAdminPassword()) {
+                isAdminLoggedIn = true;
+                sessionStorage.setItem(STORAGE_KEYS.ADMIN_SESSION, "true");
+                updateAdminUI();
+                closeLoginModal();
+                showToast("Login berhasil! Mode Admin kini aktif.", "success");
+            } else {
+                showToast("Kata sandi salah! Gunakan 'admin123' untuk demo.", "error");
+            }
+        }
+
+        function logoutAdmin() {
+            isAdminLoggedIn = false;
+            sessionStorage.removeItem(STORAGE_KEYS.ADMIN_SESSION);
+            updateAdminUI();
+            closeDetailModal();
+            showToast("Mode Admin dinonaktifkan. Anda kini melihat Pratinjau Publik.", "info");
+        }
+
+        function handleChangePassword(e) {
+            e.preventDefault();
+            const newPass = document.getElementById("new-admin-password").value.trim();
+            if (newPass.length < 4) {
+                showToast("Kata sandi minimal 4 karakter.", "error");
+                return;
+            }
+            localStorage.setItem(STORAGE_KEYS.ADMIN_PASS, newPass);
+            e.target.reset();
+            showToast("Kata sandi admin berhasil diperbarui!", "success");
+        }
+
+        // =================================================================
+        // 2. PENYIMPANAN PERSISTEN, BACKUP JSON & CLOUD SYNC
+        // =================================================================
+        function loadPostersFromStorage() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEYS.POSTERS);
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        posters = parsed;
+                        return;
+                    }
+                }
+                posters = [...defaultPosters];
+                savePostersToStorage();
+            } catch (e) {
+                console.error("Gagal memuat storage:", e);
+                posters = [...defaultPosters];
+            }
+        }
+
+        function savePostersToStorage() {
+            try {
+                localStorage.setItem(STORAGE_KEYS.POSTERS, JSON.stringify(posters));
+            } catch (e) {
+                console.error("Kapasitas storage penuh:", e);
+                showToast("Peringatan: Memori lokal hampir penuh. Gunakan URL gambar atau ekspor JSON.", "error");
+            }
+        }
+
+        function resetDataDemo() {
+            posters = [...defaultPosters];
+            savePostersToStorage();
+            resetFilters();
+            showToast("Data contoh berhasil dikembalikan ke awal.", "info");
+        }
+
+        function exportDataJSON() {
+            const dataStr = JSON.stringify(posters, null, 2);
+            const blob = new Blob([dataStr], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            const dateTag = new Date().toISOString().slice(0, 10);
+            a.href = url;
+            a.download = `infohub-posters-backup-${dateTag}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast("File cadangan JSON berhasil diunduh!", "success");
+        }
+
+        function importDataJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    if (Array.isArray(imported)) {
+                        posters = imported;
+                        savePostersToStorage();
+                        renderPosters();
+                        closeDataSyncModal();
+                        showToast(`Berhasil mengimpor ${imported.length} poster dari JSON!`, "success");
+                    } else {
+                        showToast("Format file JSON tidak valid (harus berupa array poster).", "error");
+                    }
+                } catch (err) {
+                    showToast("Gagal membaca file JSON. Pastikan format benar.", "error");
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = "";
+        }
+
+        function loadCloudConfig() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEYS.CLOUD_CONFIG);
+                if (saved) {
+                    cloudConfig = JSON.parse(saved);
+                    document.getElementById("cloud-endpoint-url").value = cloudConfig.endpointUrl || "";
+                    document.getElementById("cloud-api-key").value = cloudConfig.apiKey || "";
+                }
+            } catch (e) {}
+            updateStorageBadge();
+        }
+
+        function updateStorageBadge() {
+            const badge = document.getElementById("storage-badge");
+            if (cloudConfig.endpointUrl) {
+                badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Cloud Terhubung`;
+                badge.className = "inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200";
+            } else {
+                badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-500"></span> Lokal Browser`;
+                badge.className = "inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg bg-red-50 text-red-700 border border-red-200";
+            }
+        }
+
+        function openDataSyncModal() {
+            document.getElementById("sync-modal").classList.remove("hidden");
+        }
+
+        function closeDataSyncModal() {
+            document.getElementById("sync-modal").classList.add("hidden");
+        }
+
+        function handleSaveCloudConfig(e) {
+            e.preventDefault();
+            cloudConfig.endpointUrl = document.getElementById("cloud-endpoint-url").value.trim();
+            cloudConfig.apiKey = document.getElementById("cloud-api-key").value.trim();
+            localStorage.setItem(STORAGE_KEYS.CLOUD_CONFIG, JSON.stringify(cloudConfig));
+            updateStorageBadge();
+            showToast("Konfigurasi endpoint cloud disimpan!", "success");
+        }
+
+        async function syncWithCloud(manualTrigger = false) {
+            if (!cloudConfig.endpointUrl) {
+                if (manualTrigger) showToast("Masukkan URL Endpoint API terlebih dahulu.", "error");
+                return;
+            }
+            try {
+                const headers = { "Content-Type": "application/json" };
+                if (cloudConfig.apiKey) {
+                    headers["apikey"] = cloudConfig.apiKey;
+                    headers["Authorization"] = `Bearer ${cloudConfig.apiKey}`;
+                }
+                const response = await fetch(cloudConfig.endpointUrl, { method: "GET", headers });
+                if (!response.ok) throw new Error("HTTP " + response.status);
+                const remoteData = await response.json();
+                if (Array.isArray(remoteData) && remoteData.length > 0) {
+                    posters = remoteData;
+                    savePostersToStorage();
+                    renderPosters();
+                }
+                if (manualTrigger) showToast("Sinkronisasi dengan server cloud berhasil!", "success");
+            } catch (err) {
+                console.warn("Cloud sync error:", err);
+                if (manualTrigger) showToast("Gagal terhubung ke endpoint cloud. Periksa URL/CORS/API Key.", "error");
+            }
+        }
+
+        // =================================================================
+        // 3. KOMPRESI GAMBAR OTOMATIS DI CLIENT-SIDE (HTML5 CANVAS)
+        // =================================================================
+        function handleImageFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (!file.type.startsWith("image/")) {
+                showToast("Harap pilih file gambar yang valid (JPG, PNG, WebP).", "error");
+                return;
+            }
+
+            const originalSizeKB = (file.size / 1024).toFixed(1);
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const MAX_WIDTH = 1000;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > MAX_WIDTH) {
+                        height = Math.round((height * MAX_WIDTH) / width);
+                        width = MAX_WIDTH;
+                    }
+
+                    const canvas = document.createElement("canvas");
+                    canvas.width = width;
+                    canvas.height = height;
+
+                    const ctx = canvas.getContext("2d");
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    const compressedDataUrl = canvas.toDataURL("image/jpeg", 0.80);
+                    const base64Length = compressedDataUrl.length - "data:image/jpeg;base64,".length;
+                    const compressedBytes = Math.ceil((base64Length * 3) / 4);
+                    const compressedSizeKB = (compressedBytes / 1024).toFixed(1);
+                    const savedPercent = Math.max(0, Math.round((1 - compressedBytes / file.size) * 100));
+
+                    document.getElementById("input-image").value = compressedDataUrl;
+                    document.getElementById("compression-preview-thumb").src = compressedDataUrl;
+                    document.getElementById("compression-detail").textContent = 
+                        `Awal: ${originalSizeKB} KB → Kompresi (${width}x${height}px): ${compressedSizeKB} KB (Hemat ${savedPercent}%)`;
+                    document.getElementById("compression-stats").classList.remove("hidden");
+
+                    showToast(`Gambar dikompresi menjadi ${compressedSizeKB} KB!`, "success");
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // =================================================================
+        // 4. RENDER GALERI POSTER (DENGAN LAZY LOADING)
+        // =================================================================
+        function renderPosters() {
+            const grid = document.getElementById("poster-grid");
+            const emptyState = document.getElementById("empty-state");
+            const countEl = document.getElementById("poster-count");
+
+            const filtered = posters.filter(poster => {
+                const matchCategory = currentCategory === "Semua" || poster.category === currentCategory;
+                const q = searchQuery.toLowerCase();
+                const matchSearch = 
+                    poster.title.toLowerCase().includes(q) ||
+                    poster.description.toLowerCase().includes(q) ||
+                    poster.cpName.toLowerCase().includes(q) ||
+                    poster.category.toLowerCase().includes(q);
+                return matchCategory && matchSearch;
+            });
+
+            countEl.textContent = filtered.length;
+            grid.innerHTML = "";
+
+            if (filtered.length === 0) {
+                grid.classList.add("hidden");
+                emptyState.classList.remove("hidden");
+                return;
+            }
+
+            grid.classList.remove("hidden");
+            emptyState.classList.add("hidden");
+
+            filtered.forEach(poster => {
+                const card = document.createElement("article");
+                card.className = "group bg-white rounded-2xl border border-red-200/80 overflow-hidden shadow-sm hover:shadow-xl hover:border-[#FF0000] hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col relative";
+                card.onclick = () => openDetailModal(poster.id);
+
+                const badgeStyle = getCategoryBadgeStyle(poster.category);
+
+                const adminCardControls = isAdminLoggedIn ? `
+                    <div class="absolute top-3 right-3 z-20 flex items-center gap-1.5" onclick="event.stopPropagation()">
+                        <button type="button" onclick="openPosterFormModal(${poster.id})" title="Edit Poster"
+                            class="w-8 h-8 rounded-lg bg-amber-500 hover:bg-amber-600 text-white shadow-md flex items-center justify-center transition active:scale-95">
+                            <i class="fa-solid fa-pen-to-square text-xs"></i>
+                        </button>
+                        <button type="button" onclick="deletePoster(${poster.id})" title="Hapus Poster"
+                            class="w-8 h-8 rounded-lg bg-[#FF0000] hover:bg-[#D40000] text-white shadow-md flex items-center justify-center transition active:scale-95">
+                            <i class="fa-regular fa-trash-can text-xs"></i>
+                        </button>
+                    </div>
+                ` : "";
+
+                card.innerHTML = `
+                    ${adminCardControls}
+                    <!-- Container Rasio Poster 3:4 -->
+                    <div class="relative aspect-[3/4] w-full bg-slate-900 overflow-hidden">
+                        <img src="${poster.image}" alt="${escapeHtml(poster.title)}"
+                             onerror="this.onerror=null; this.src='https://placehold.co/600x800/FF0000/ffffff?text=HIMA+ELIN+PENS';"
+                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                        
+                        <!-- Overlay Hover -->
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+                            <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-white bg-[#FF0000] px-3 py-1.5 rounded-lg shadow">
+                                <i class="fa-solid fa-eye"></i> Lihat Detail & Kontak
+                            </span>
+                        </div>
+
+                        <!-- Badge Kategori -->
+                        <div class="absolute top-3 left-3">
+                            <span class="px-2.5 py-1 rounded-lg text-[11px] font-semibold shadow-sm backdrop-blur-md ${badgeStyle}">
+                                ${escapeHtml(poster.category)}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Informasi Ringkas Bawah Kartu -->
+                    <div class="p-4 flex-grow flex flex-col justify-between bg-white">
+                        <div>
+                            <div class="flex items-center gap-1.5 text-xs text-slate-500 mb-1.5">
+                                <i class="fa-regular fa-calendar text-[#FF0000]"></i>
+                                <span>${escapeHtml(poster.date)}</span>
+                            </div>
+                            <h3 class="font-bold text-slate-900 text-sm sm:text-base line-clamp-2 group-hover:text-[#FF0000] transition-colors">
+                                ${escapeHtml(poster.title)}
+                            </h3>
+                        </div>
+
+                        <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-600">
+                            <span class="truncate max-w-[70%] flex items-center gap-1.5">
+                                <i class="fa-regular fa-user text-[#FF0000]"></i>
+                                ${escapeHtml(poster.cpName)}
+                            </span>
+                            <span class="text-[#FF0000] font-bold group-hover:translate-x-0.5 transition-transform">
+                                Detail &rarr;
+                            </span>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function getCategoryBadgeStyle(category) {
+            switch (category) {
+                case "Seminar/Workshop":
+                    return "bg-white/95 text-[#FF0000] border border-red-200";
+                case "Lomba":
+                    return "bg-amber-50/95 text-amber-800 border border-amber-300";
+                case "Lowongan/Magang":
+                    return "bg-slate-900/90 text-white border border-slate-700";
+                case "Pengumuman":
+                    return "bg-[#FF0000]/95 text-white border border-red-600";
+                default:
+                    return "bg-white/95 text-[#FF0000] border border-red-200";
+            }
+        }
+
+        function setupEventListeners() {
+            const filterBtns = document.querySelectorAll(".filter-btn");
+            filterBtns.forEach(btn => {
+                btn.addEventListener("click", () => {
+                    filterBtns.forEach(b => {
+                        b.classList.remove("bg-[#FF0000]", "text-white", "shadow-sm", "shadow-red-500/30");
+                        b.classList.add("bg-white", "text-slate-700", "border", "border-red-200");
+                    });
+                    btn.classList.remove("bg-white", "text-slate-700", "border", "border-red-200");
+                    btn.classList.add("bg-[#FF0000]", "text-white", "shadow-sm", "shadow-red-500/30");
+
+                    currentCategory = btn.getAttribute("data-category");
+                    renderPosters();
+                });
+            });
+
+            document.getElementById("search-input").addEventListener("input", (e) => {
+                searchQuery = e.target.value;
+                renderPosters();
+            });
+
+            document.getElementById("login-form").addEventListener("submit", handleLoginSubmit);
+            document.getElementById("poster-form").addEventListener("submit", handlePosterFormSubmit);
+            document.getElementById("cloud-config-form").addEventListener("submit", handleSaveCloudConfig);
+            document.getElementById("change-password-form").addEventListener("submit", handleChangePassword);
+
+            document.addEventListener("keydown", (e) => {
+                if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === "a") {
+                    e.preventDefault();
+                    if (!isAdminLoggedIn) {
+                        openLoginModal();
+                    }
+                }
+                if (e.key === "Escape") {
+                    closeDetailModal();
+                    closePosterFormModal();
+                    closeLoginModal();
+                    closeDataSyncModal();
+                }
+            });
+        }
+
+        function resetFilters() {
+            currentCategory = "Semua";
+            searchQuery = "";
+            document.getElementById("search-input").value = "";
+            
+            const filterBtns = document.querySelectorAll(".filter-btn");
+            filterBtns.forEach(b => {
+                if (b.getAttribute("data-category") === "Semua") {
+                    b.classList.remove("bg-white", "text-slate-700", "border", "border-red-200");
+                    b.classList.add("bg-[#FF0000]", "text-white", "shadow-sm", "shadow-red-500/30");
+                } else {
+                    b.classList.remove("bg-[#FF0000]", "text-white", "shadow-sm", "shadow-red-500/30");
+                    b.classList.add("bg-white", "text-slate-700", "border", "border-red-200");
+                }
+            });
+            renderPosters();
+        }
+
+        // =================================================================
+        // 5. LOGIKA MODAL DETAIL POSTER
+        // =================================================================
+        function openDetailModal(id) {
+            const poster = posters.find(p => p.id === id);
+            if (!poster) return;
+
+            document.getElementById("modal-poster-img").src = poster.image;
+            document.getElementById("modal-poster-category").textContent = poster.category;
+            document.getElementById("modal-poster-date").innerHTML = `<i class="fa-regular fa-calendar"></i> ${escapeHtml(poster.date)}`;
+            document.getElementById("modal-poster-title").textContent = poster.title;
+            document.getElementById("modal-poster-desc").textContent = poster.description;
+            document.getElementById("modal-poster-cp").textContent = poster.cpName;
+            
+            const cleanWa = formatWhatsAppNumber(poster.whatsapp);
+            document.getElementById("modal-poster-phone-display").textContent = "+" + cleanWa;
+            
+            const waText = encodeURIComponent(`Halo ${poster.cpName}, saya melihat poster "${poster.title}" di InfoHub dan ingin bertanya lebih lanjut.`);
+            document.getElementById("modal-btn-wa").href = `https://wa.me/${cleanWa}?text=${waText}`;
+            document.getElementById("modal-btn-link").href = normalizeUrl(poster.link);
+
+            const adminActions = document.getElementById("modal-admin-actions");
+            if (isAdminLoggedIn) {
+                adminActions.classList.remove("hidden");
+                document.getElementById("modal-btn-edit").onclick = () => {
+                    closeDetailModal();
+                    openPosterFormModal(poster.id);
+                };
+                document.getElementById("modal-btn-delete").onclick = () => deletePoster(poster.id);
+            } else {
+                adminActions.classList.add("hidden");
+            }
+
+            document.getElementById("detail-modal").classList.remove("hidden");
+            document.body.style.overflow = "hidden";
+        }
+
+        function closeDetailModal() {
+            document.getElementById("detail-modal").classList.add("hidden");
+            document.body.style.overflow = "";
+        }
+
+        function deletePoster(id) {
+            if (!isAdminLoggedIn) return;
+            posters = posters.filter(p => p.id !== id);
+            savePostersToStorage();
+            closeDetailModal();
+            renderPosters();
+            showToast("Poster berhasil dihapus dari papan informasi.", "info");
+        }
+
+        // =================================================================
+        // 6. LOGIKA MODAL TAMBAH / EDIT POSTER + VALIDASI OTOMATIS
+        // =================================================================
+        function openPosterFormModal(editId = null) {
+            if (!isAdminLoggedIn) {
+                openLoginModal();
+                return;
+            }
+
+            const form = document.getElementById("poster-form");
+            form.reset();
+            document.getElementById("compression-stats").classList.add("hidden");
+            document.getElementById("edit-poster-id").value = "";
+
+            if (editId) {
+                const poster = posters.find(p => p.id === editId);
+                if (poster) {
+                    document.getElementById("form-modal-title").textContent = "Edit Informasi Poster";
+                    document.getElementById("form-modal-icon").className = "fa-solid fa-pen-to-square";
+                    document.getElementById("btn-submit-poster").textContent = "Simpan Perubahan";
+
+                    document.getElementById("edit-poster-id").value = poster.id;
+                    document.getElementById("input-title").value = poster.title;
+                    document.getElementById("input-category").value = poster.category;
+                    document.getElementById("input-image").value = poster.image;
+                    document.getElementById("input-desc").value = poster.description;
+                    document.getElementById("input-cp").value = poster.cpName;
+                    document.getElementById("input-wa").value = poster.whatsapp;
+                    document.getElementById("input-link").value = poster.link;
+                }
+            } else {
+                document.getElementById("form-modal-title").textContent = "Tambah Poster Baru";
+                document.getElementById("form-modal-icon").className = "fa-solid fa-plus";
+                document.getElementById("btn-submit-poster").textContent = "Simpan & Publikasikan Poster";
+            }
+
+            updateWaPreview();
+            updateUrlPreview();
+            document.getElementById("poster-form-modal").classList.remove("hidden");
+            document.body.style.overflow = "hidden";
+        }
+
+        function closePosterFormModal() {
+            document.getElementById("poster-form-modal").classList.add("hidden");
+            document.body.style.overflow = "";
+        }
+
+        function setPresetImage(type) {
+            const inputImg = document.getElementById("input-image");
+            document.getElementById("compression-stats").classList.add("hidden");
+            if (type === "tech") {
+                inputImg.value = "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80";
+            } else if (type === "design") {
+                inputImg.value = "https://images.unsplash.com/photo-1561070791-2526d30994b5?auto=format&fit=crop&w=800&q=80";
+            } else if (type === "career") {
+                inputImg.value = "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=800&q=80";
+            }
+            showToast("URL gambar preset diterapkan!", "success");
+        }
+
+        function updateWaPreview() {
+            const raw = document.getElementById("input-wa").value.trim();
+            const previewEl = document.getElementById("wa-normalized-preview");
+            if (!raw) {
+                previewEl.textContent = "Format wa.me: -";
+                return;
+            }
+            const formatted = formatWhatsAppNumber(raw);
+            previewEl.textContent = `Format valid: wa.me/${formatted}`;
+        }
+
+        function updateUrlPreview() {
+            const raw = document.getElementById("input-link").value.trim();
+            const previewEl = document.getElementById("url-normalized-preview");
+            if (!raw) {
+                previewEl.textContent = "Otomatis menambahkan protokol https:// jika belum ada.";
+                previewEl.className = "text-[11px] text-slate-500 mt-1";
+                return;
+            }
+            const normalized = normalizeUrl(raw);
+            previewEl.textContent = `Tautan tujuan: ${normalized}`;
+            previewEl.className = "text-[11px] text-[#FF0000] font-mono mt-1 truncate";
+        }
+
+        function handlePosterFormSubmit(e) {
+            e.preventDefault();
+            if (!isAdminLoggedIn) return;
+
+            const editId = document.getElementById("edit-poster-id").value;
+            const title = document.getElementById("input-title").value.trim();
+            const category = document.getElementById("input-category").value;
+            const image = document.getElementById("input-image").value.trim();
+            const description = document.getElementById("input-desc").value.trim();
+            const cpName = document.getElementById("input-cp").value.trim();
+            const rawWa = document.getElementById("input-wa").value.trim();
+            const rawLink = document.getElementById("input-link").value.trim();
+
+            const normalizedWa = formatWhatsAppNumber(rawWa);
+            const normalizedLink = normalizeUrl(rawLink);
+
+            if (normalizedWa.length < 10) {
+                showToast("Nomor WhatsApp terlalu pendek atau tidak valid.", "error");
+                return;
+            }
+
+            if (editId) {
+                const idx = posters.findIndex(p => p.id === Number(editId));
+                if (idx !== -1) {
+                    posters[idx] = {
+                        ...posters[idx],
+                        title,
+                        category,
+                        image,
+                        description,
+                        cpName,
+                        whatsapp: normalizedWa,
+                        link: normalizedLink
+                    };
+                    showToast("Perubahan poster berhasil disimpan!", "success");
+                }
+            } else {
+                const today = new Date();
+                const months = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+                const formattedDate = `${today.getDate()} ${months[today.getMonth()]} ${today.getFullYear()}`;
+
+                const newPoster = {
+                    id: Date.now(),
+                    title,
+                    category,
+                    date: formattedDate,
+                    image,
+                    description,
+                    cpName,
+                    whatsapp: normalizedWa,
+                    link: normalizedLink
+                };
+                posters.unshift(newPoster);
+                showToast("Poster baru berhasil ditambahkan ke papan!", "success");
+            }
+
+            savePostersToStorage();
+            closePosterFormModal();
+            renderPosters();
+        }
+
+        function formatWhatsAppNumber(phone) {
+            let cleaned = phone.replace(/\D/g, "");
+            if (cleaned.startsWith("0")) {
+                cleaned = "62" + cleaned.substring(1);
+            } else if (!cleaned.startsWith("62")) {
+                cleaned = "62" + cleaned;
+            }
+            return cleaned;
+        }
+
+        function normalizeUrl(url) {
+            if (!url) return "#";
+            if (!/^https?:\/\//i.test(url)) {
+                return "https://" + url;
+            }
+            return url;
+        }
+
+        function escapeHtml(text) {
+            if (!text) return "";
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function showToast(message, type = "success") {
+            const container = document.getElementById("toast-container");
+            const toast = document.createElement("div");
+            
+            let bgClass = "bg-[#280707] text-white border border-red-800";
+            let icon = '<i class="fa-solid fa-circle-check text-emerald-400"></i>';
+
+            if (type === "info") {
+                bgClass = "bg-red-950 text-white border border-red-800";
+                icon = '<i class="fa-solid fa-circle-info text-red-200"></i>';
+            } else if (type === "error") {
+                bgClass = "bg-rose-950 text-white border border-rose-800";
+                icon = '<i class="fa-solid fa-triangle-exclamation text-rose-300"></i>';
+            }
+
+            toast.className = `${bgClass} px-4 py-3 rounded-xl shadow-lg text-sm font-medium flex items-center gap-2.5 transform transition-all duration-300 translate-y-2 opacity-0`;
+            toast.innerHTML = `${icon} <span>${message}</span>`;
+
+            container.appendChild(toast);
+
+            requestAnimationFrame(() => {
+                toast.classList.remove("translate-y-2", "opacity-0");
+            });
+
+            setTimeout(() => {
+                toast.classList.add("translate-y-2", "opacity-0");
+                setTimeout(() => toast.remove(), 300);
+            }, 3200);
+        }
+    </script>
+</body>
+</html>
