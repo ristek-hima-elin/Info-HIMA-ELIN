@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InfoHub HIMA ELIN PENS — Dashboard Informasi Digital</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome untuk Ikon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#FF0000',
+                        primaryHover: '#D40000',
+                        etholBg: '#F4F6F9',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #F1F5F9; }
+        ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #FF0000; }
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.96) translateY(8px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .modal-animate { animation: modalFadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    </style>
+</head>
+<body class="bg-etholBg text-slate-800 font-sans antialiased min-h-screen flex overflow-x-hidden">
+
+    <!-- Notifikasi Toast -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- Backdrop Sidebar Mobile -->
+    <div id="sidebar-backdrop" onclick="toggleMobileSidebar()" class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-30 hidden lg:hidden transition-opacity"></div>
+
+    <!-- =====================================================================
+         SIDEBAR NAVIGASI KIRI (GAYA DASHBOARD ETHOL PENS)
+    ====================================================================== -->
+    <aside id="app-sidebar" class="fixed lg:sticky top-0 left-0 z-40 h-screen w-72 bg-white border-r border-slate-200 flex flex-col justify-between transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out shrink-0 shadow-lg lg:shadow-none">
+        
+        <div class="overflow-y-auto flex-grow">
+            <!-- Header Sidebar & Logo -->
+            <div class="h-16 px-5 border-b border-slate-200 flex items-center justify-between">
+                <div id="brand-logo-trigger" onclick="handleSecretLogoTap()" class="flex items-center gap-3 cursor-pointer select-none group" title="HIMA ELIN PENS InfoHub">
+                    <div class="w-10 h-10 rounded-xl bg-white group-active:scale-95 transition-transform flex items-center justify-center shadow-sm border border-slate-200 shrink-0 overflow-hidden">
+                        <img src="logo-hima-elin.jpg" alt="Logo HIMA ELIN PENS" 
+                             onerror="this.onerror=null; this.src='https://placehold.co/100x100/FF0000/ffffff?text=ELIN';"
+                             class="w-full h-full object-contain p-0.5">
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="font-extrabold text-base text-slate-900 tracking-tight">HIMA <span class="text-[#FF0000]">ELIN</span></span>
+                            <span class="text-[10px] font-bold bg-red-50 text-[#FF0000] border border-red-200 px-1.5 py-0.5 rounded">PENS</span>
+                        </div>
+                        <p class="text-[11px] text-slate-500 font-medium leading-none mt-0.5">InfoHub • Dep. RISTEK</p>
+                    </div>
+                </div>
+                <button onclick="toggleMobileSidebar()" class="lg:hidden w-8 h-8 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 flex items-center justify-center">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Kartu Status Pengguna -->
+            <div class="p-4">
+                <div id="sidebar-user-card" class="bg-gradient-to-br from-slate-900 to-slate-800 rounded-xl p-3.5 text-white shadow-sm relative overflow-hidden">
+                    <div class="absolute -right-4 -bottom-4 w-16 h-16 bg-[#FF0000]/20 rounded-full blur-md"></div>
+                    <div class="flex items-center gap-3 relative z-10">
+                        <div id="user-avatar-badge" class="w-10 h-10 rounded-lg bg-[#FF0000] flex items-center justify-center text-white font-bold text-sm shrink-0 shadow">
+                            <i class="fa-solid fa-bolt"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <p id="sidebar-role-title" class="text-xs font-bold text-white truncate">Mahasiswa & Umum</p>
+                            <p id="sidebar-role-subtitle" class="text-[11px] text-slate-300 truncate">Teknik Elektro Industri</p>
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Menu Kategori Sidebar -->
+            <div class="px-3 pb-4">
+                <p class="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">Menu Informasi</p>
+                <nav class="space-y-1" id="sidebar-category-nav">
+                    <button data-category="Semua" class="sidebar-nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold bg-red-50 text-[#FF0000] transition">
+                        <span class="flex items-center gap-3">
+                            <i class="fa-solid fa-table-columns w-4 text-center"></i>
+                            <span>Semua Informasi</span>
+                        </span>
+                        <span id="count-all" class="text-xs font-bold px-2 py-0.5 rounded-full bg-[#FF0000] text-white">0</span>
+                    </button>
+
+                    <button data-category="Seminar/Workshop" class="sidebar-nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition">
+                        <span class="flex items-center gap-3">
+                            <i class="fa-solid fa-chalkboard-user w-4 text-center text-slate-400"></i>
+                            <span>Seminar & Pelatihan</span>
+                        </span>
+                        <span id="count-seminar" class="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">0</span>
+                    </button>
+
+                    <button data-category="Lomba" class="sidebar-nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition">
+                        <span class="flex items-center gap-3">
+                            <i class="fa-solid fa-trophy w-4 text-center text-slate-400"></i>
+                            <span>Lomba & Kompetisi</span>
+                        </span>
+                        <span id="count-lomba" class="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">0</span>
+                    </button>
+
+                    <button data-category="Lowongan/Magang" class="sidebar-nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition">
+                        <span class="flex items-center gap-3">
+                            <i class="fa-solid fa-briefcase w-4 text-center text-slate-400"></i>
+                            <span>KP, Magang & Karir</span>
+                        </span>
+                        <span id="count-magang" class="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">0</span>
+                    </button>
+
+                    <button data-category="Pengumuman" class="sidebar-nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition">
+                        <span class="flex items-center gap-3">
+                            <i class="fa-solid fa-bullhorn w-4 text-center text-slate-400"></i>
+                            <span>Info HIMA & Akademik</span>
+                        </span>
+                        <span id="count-pengumuman" class="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">0</span>
+                    </button>
+                </nav>
+
+                <!-- Tautan Cepat PENS -->
+                <p class="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 mt-6 mb-2">Tautan Cepat PENS</p>
+                <div class="space-y-1 text-xs">
+                    <a href="https://ethol.pens.ac.id" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 hover:text-[#FF0000] transition">
+                        <span class="flex items-center gap-2.5"><i class="fa-solid fa-graduation-cap w-4 text-center text-sky-600"></i> ETHOL PENS</span>
+                        <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-slate-400"></i>
+                    </a>
+                    <a href="https://online.mis.pens.ac.id" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 hover:text-[#FF0000] transition">
+                        <span class="flex items-center gap-2.5"><i class="fa-solid fa-server w-4 text-center text-indigo-600"></i> Online MIS</span>
+                        <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-slate-400"></i>
+                    </a>
+                    <a href="https://elin.pens.ac.id" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 hover:text-[#FF0000] transition">
+                        <span class="flex items-center gap-2.5"><i class="fa-solid fa-microchip w-4 text-center text-[#FF0000]"></i> Prodi ELIN</span>
+                        <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-slate-400"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer Sidebar dengan Tombol Login Admin -->
+        <div class="p-4 border-t border-slate-200 bg-slate-50/80 text-[11px] text-slate-500 flex items-center justify-between">
+            <div>
+                <p class="font-semibold text-slate-700">HIMA ELIN PENS</p>
+                <p class="text-[10px] text-slate-400">Surabaya • 2026</p>
+            </div>
+          
+            
+        </div>
+    </aside>
+
+    <!-- =====================================================================
+         KONTEN UTAMA
+    ====================================================================== -->
+    <div class="flex-1 flex flex-col min-w-0">
+        
+        <!-- Top Navbar -->
+        <header class="sticky top-0 z-20 h-16 bg-white/95 backdrop-blur-md border-b border-slate-200 px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
+            <div class="flex items-center gap-3 min-w-0">
+                <button onclick="toggleMobileSidebar()" class="lg:hidden w-9 h-9 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 flex items-center justify-center shrink-0">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <div class="min-w-0">
+                    <div class="flex items-center gap-1.5 text-[11px] text-slate-400 font-medium">
+                        <span>Portal HIMA ELIN</span>
+                        <i class="fa-solid fa-chevron-right text-[9px]"></i>
+                        <span id="breadcrumb-category" class="text-[#FF0000] font-semibold truncate">Semua Informasi</span>
+                    </div>
+                    <h1 class="text-base sm:text-lg font-bold text-slate-900 truncate">
+                        Papan Informasi Poster Digital
+                    </h1>
+                </div>
+            </div>
+
+            <!-- Indikator Status Cloud Publik & Pencarian -->
+            <div class="flex items-center gap-3">
+                <span id="public-sync-indicator" class="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 text-[11px] font-medium">
+                    <span class="w-2 h-2 rounded-full bg-slate-400"></span> Memuat...
+                </span>
+
+                <div class="relative hidden sm:block w-56 md:w-64">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                        <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                    </div>
+                    <input type="text" id="search-input" placeholder="Cari kegiatan, lomba, CP..." 
+                        class="w-full pl-9 pr-3 py-1.5 bg-etholBg border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#FF0000]/20 focus:border-[#FF0000] transition">
+                </div>
+            </div>
+        </header>
+
+        <!-- Toolbar Admin -->
+        <div id="admin-toolbar" class="hidden bg-slate-900 text-white px-4 sm:px-6 lg:px-8 py-3 border-b border-slate-800 flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-2.5 text-xs">
+                <span class="px-2 py-0.5 bg-[#FF0000] text-white rounded font-bold uppercase tracking-wider text-[10px]">Mode Admin RISTEK</span>
+                <span id="admin-cloud-badge" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white/10 text-amber-300 font-medium">
+                    <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> Mode Lokal
+                </span>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2">
+                <button onclick="openPosterFormModal()" class="inline-flex items-center gap-1.5 bg-[#FF0000] hover:bg-[#D40000] text-white text-xs font-semibold px-3.5 py-2 rounded-lg shadow transition active:scale-95">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>Tambah Poster</span>
+                </button>
+                <button onclick="fetchPostersFromCloud(true)" class="inline-flex items-center gap-1.5 bg-white/10 hover:bg-white/20 text-white text-xs font-medium px-3 py-2 rounded-lg transition">
+                    <i class="fa-solid fa-arrows-rotate text-sky-400"></i>
+                    <span>Refresh Cloud</span>
+                </button>
+                <button onclick="openDataSyncModal()" class="inline-flex items-center gap-1.5 bg-white/10 hover:bg-white/20 text-white text-xs font-medium px-3 py-2 rounded-lg transition">
+                    <i class="fa-solid fa-database text-amber-400"></i>
+                    <span>Backup & Sandi</span>
+                </button>
+                <button onclick="logoutAdmin()" class="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3 py-2 rounded-lg transition">
+                    <i class="fa-solid fa-eye"></i>
+                    <span>Pratinjau Publik</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Workspace Utama -->
+        <main class="flex-grow p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto space-y-6">
+            
+            <!-- Pencarian Mobile -->
+            <div class="sm:hidden relative">
+                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                    <i class="fa-solid fa-magnifying-glass text-sm"></i>
+                </div>
+                <input type="text" id="search-input-mobile" placeholder="Cari info kegiatan, lomba, atau CP..." 
+                    class="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#FF0000]/20 focus:border-[#FF0000]">
+            </div>
+
+            <!-- Kartu Statistik Cepat -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                <div onclick="selectCategoryFromCard('Semua')" class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs hover:border-[#FF0000] transition cursor-pointer flex items-center gap-3.5">
+                    <div class="w-11 h-11 rounded-xl bg-red-50 text-[#FF0000] flex items-center justify-center text-lg shrink-0">
+                        <i class="fa-solid fa-layer-group"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-500 font-medium">Total Informasi</p>
+                        <p id="stat-total" class="text-xl font-extrabold text-slate-900">0</p>
+                    </div>
+                </div>
+
+                <div onclick="selectCategoryFromCard('Seminar/Workshop')" class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs hover:border-sky-500 transition cursor-pointer flex items-center gap-3.5">
+                    <div class="w-11 h-11 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center text-lg shrink-0">
+                        <i class="fa-solid fa-chalkboard-user"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-500 font-medium">Seminar & Pelatihan</p>
+                        <p id="stat-seminar" class="text-xl font-extrabold text-slate-900">0</p>
+                    </div>
+                </div>
+
+                <div onclick="selectCategoryFromCard('Lomba')" class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs hover:border-amber-500 transition cursor-pointer flex items-center gap-3.5">
+                    <div class="w-11 h-11 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg shrink-0">
+                        <i class="fa-solid fa-trophy"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-500 font-medium">Lomba & Kompetisi</p>
+                        <p id="stat-lomba" class="text-xl font-extrabold text-slate-900">0</p>
+                    </div>
+                </div>
+
+                <div onclick="selectCategoryFromCard('Lowongan/Magang')" class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs hover:border-emerald-500 transition cursor-pointer flex items-center gap-3.5">
+                    <div class="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg shrink-0">
+                        <i class="fa-solid fa-briefcase"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-500 font-medium">KP, Magang & Karir</p>
+                        <p id="stat-magang" class="text-xl font-extrabold text-slate-900">0</p>
+                    </div>
+                </div>
+            </div>
+
+           
+            <!-- Galeri Poster -->
+            <section class="bg-white rounded-2xl border border-slate-200 shadow-xs p-5 sm:p-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 mb-6 border-b border-slate-100">
+                    <div>
+                        <h2 id="section-active-title" class="text-base sm:text-lg font-bold text-slate-900">Semua Informasi Aktif</h2>
+                        <p class="text-xs text-slate-500 mt-0.5">
+                            Menampilkan <span id="poster-count" class="font-bold text-[#FF0000]">0</span> poster • Klik poster untuk detail & kontak CP
+                        </p>
+                    </div>
+
+                    <div class="flex items-center gap-1.5 overflow-x-auto pb-1 lg:hidden" id="mobile-category-pills">
+                        <button data-category="Semua" class="mobile-pill px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#FF0000] text-white whitespace-nowrap">Semua</button>
+                        <button data-category="Seminar/Workshop" class="mobile-pill px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-100 text-slate-700 whitespace-nowrap">Seminar</button>
+                        <button data-category="Lomba" class="mobile-pill px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-100 text-slate-700 whitespace-nowrap">Lomba</button>
+                        <button data-category="Lowongan/Magang" class="mobile-pill px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-100 text-slate-700 whitespace-nowrap">Magang</button>
+                        <button data-category="Pengumuman" class="mobile-pill px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-100 text-slate-700 whitespace-nowrap">Info HIMA</button>
+                    </div>
+                </div>
+
+                <!-- Grid Poster -->
+                <div id="poster-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-5"></div>
+
+                <!-- State Kosong -->
+                <div id="empty-state" class="hidden text-center py-14 px-4 bg-etholBg rounded-2xl border border-dashed border-slate-300">
+                    <div class="w-14 h-14 bg-white text-[#FF0000] rounded-2xl flex items-center justify-center mx-auto mb-3 text-xl shadow-xs border border-slate-200">
+                        <i class="fa-regular fa-folder-open"></i>
+                    </div>
+                    <h3 class="text-base font-bold text-slate-900 mb-1">Tidak ada poster ditemukan</h3>
+                    <p class="text-xs text-slate-500 max-w-md mx-auto mb-5">Coba ubah kata kunci atau pilih kategori lain di menu sidebar.</p>
+                    <button onclick="resetFilters()" class="px-4 py-2 bg-[#FF0000] text-white font-semibold text-xs rounded-xl hover:bg-[#D40000] transition">
+                        Tampilkan Semua Poster
+                    </button>
+                </div>
+            </section>
+        </main>
+
+        <footer class="bg-white border-t border-slate-200 px-4 sm:px-6 lg:px-8 py-4 text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-2">
+            <p>© 2026 <span class="font-semibold text-slate-800">Departemen RISTEK — HIMA ELIN PENS</span>. All rights reserved.</p>
+            <p class="text-[11px] text-slate-400">Politeknik Elektronika Negeri Surabaya</p>
+        </footer>
+    </div>
+
+    <!-- =====================================================================
+         MODAL 1: DETAIL POSTER
+    ====================================================================== -->
+    <div id="detail-modal" class="fixed inset-0 z-50 hidden overflow-y-auto" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 bg-slate-950/75 backdrop-blur-xs transition-opacity" onclick="closeDetailModal()"></div>
+        <div class="flex min-h-full items-center justify-center p-4 sm:p-6">
+            <div class="modal-animate relative w-full max-w-4xl bg-white rounded-2xl shadow-2xl overflow-hidden border border-slate-200 flex flex-col md:flex-row">
+                
+                <button onclick="closeDetailModal()" class="absolute top-4 right-4 z-10 w-9 h-9 rounded-full bg-white/90 hover:bg-[#FF0000] text-slate-700 hover:text-white flex items-center justify-center shadow-md transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+
+                <div class="w-full md:w-1/2 bg-slate-900 flex items-center justify-center p-4 sm:p-6 relative">
+                    <img id="modal-poster-img" src="" alt="Poster Detail" class="max-h-[70vh] w-auto object-contain rounded-xl shadow-lg">
+                </div>
+
+                <div class="w-full md:w-1/2 p-6 sm:p-8 flex flex-col justify-between max-h-[85vh] overflow-y-auto bg-white">
+                    <div>
+                        <div class="flex flex-wrap items-center gap-2 mb-3">
+                            <span id="modal-poster-category" class="px-3 py-1 rounded-full text-xs font-semibold bg-red-50 text-[#FF0000] border border-red-200">Kategori</span>
+                            <span id="modal-poster-date" class="text-xs text-slate-500 flex items-center gap-1"><i class="fa-regular fa-calendar"></i> Tanggal</span>
+                        </div>
+
+                        <h2 id="modal-poster-title" class="text-xl sm:text-2xl font-bold text-slate-900 leading-snug mb-4">Judul</h2>
+
+                        <div class="space-y-2 mb-6">
+                            <h4 class="text-xs font-bold uppercase tracking-wider text-[#FF0000]">Deskripsi Informasi</h4>
+                            <p id="modal-poster-desc" class="text-sm text-slate-700 leading-relaxed whitespace-pre-line">Deskripsi...</p>
+                        </div>
+
+                        <div class="bg-etholBg rounded-xl p-4 border border-slate-200 mb-6">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-[#FF0000]/10 text-[#FF0000] flex items-center justify-center shrink-0 border border-[#FF0000]/20">
+                                    <i class="fa-solid fa-user-tie"></i>
+                                </div>
+                                <div class="overflow-hidden">
+                                    <p class="text-xs text-slate-500">Narahubung / Contact Person</p>
+                                    <p id="modal-poster-cp" class="text-sm font-bold text-slate-900 truncate">-</p>
+                                    <p id="modal-poster-phone-display" class="text-xs text-[#FF0000] font-mono font-semibold mt-0.5">-</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3 pt-4 border-t border-slate-100">
+                        <a id="modal-btn-wa" href="#" target="_blank" rel="noopener noreferrer" 
+                           class="w-full flex items-center justify-center gap-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm py-3 px-4 rounded-xl shadow-md transition">
+                            <i class="fa-brands fa-whatsapp text-lg"></i>
+                            <span>Hubungi Kontak (WhatsApp)</span>
+                        </a>
+
+                        <a id="modal-btn-link" href="#" target="_blank" rel="noopener noreferrer" 
+                           class="w-full flex items-center justify-center gap-2.5 bg-[#FF0000] hover:bg-[#D40000] text-white font-semibold text-sm py-3 px-4 rounded-xl shadow-md transition">
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                            <span>Kunjungi Tautan Informasi</span>
+                        </a>
+
+                        <div id="modal-admin-actions" class="hidden pt-3 mt-2 border-t border-dashed border-slate-200 flex items-center justify-between gap-2">
+                            <button id="modal-btn-edit" type="button" class="flex-1 py-2 px-3 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 text-xs font-semibold inline-flex items-center justify-center gap-1.5 transition">
+                                <i class="fa-solid fa-pen-to-square"></i> Edit Poster
+                            </button>
+                            <button id="modal-btn-delete" type="button" class="flex-1 py-2 px-3 rounded-lg bg-red-50 hover:bg-red-100 text-red-700 border border-red-300 text-xs font-semibold inline-flex items-center justify-center gap-1.5 transition">
+                                <i class="fa-regular fa-trash-can"></i> Hapus Poster
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: LOGIN ADMIN -->
+    <div id="login-modal" class="fixed inset-0 z-50 hidden overflow-y-auto" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 bg-slate-950/75 backdrop-blur-sm transition-opacity" onclick="closeLoginModal()"></div>
+        <div class="flex min-h-full items-center justify-center p-4">
+            <div class="modal-animate relative w-full max-w-md bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
+                <div class="p-6 sm:p-8">
+                    <div class="w-12 h-12 rounded-2xl bg-[#FF0000] text-white flex items-center justify-center text-xl mb-4 shadow-md">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900">Login Admin RISTEK</h3>
+                    <p class="text-sm text-slate-600 mt-1">Masukkan kata sandi pengurus HIMA ELIN PENS.</p>
+
+                    <form id="login-form" class="mt-5 space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Kata Sandi Admin</label>
+                            <div class="relative">
+                                <input type="password" id="admin-password-input" required placeholder="Masukkan kata sandi..."
+                                    class="w-full pl-3.5 pr-10 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-[#FF0000]">
+                                <button type="button" onclick="togglePasswordVisibility()" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-700">
+                                    <i id="eye-icon" class="fa-regular fa-eye text-sm"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-end gap-2.5 pt-2">
+                            <button type="button" onclick="closeLoginModal()" class="px-4 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 transition">Batal</button>
+                            <button type="submit" class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-[#FF0000] hover:bg-[#D40000] text-white shadow-md transition">Masuk</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 3: TAMBAH / EDIT POSTER -->
+    <div id="poster-form-modal" class="fixed inset-0 z-50 hidden overflow-y-auto" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 bg-slate-950/75 backdrop-blur-sm transition-opacity" onclick="closePosterFormModal()"></div>
+        <div class="flex min-h-full items-center justify-center p-4 sm:p-6">
+            <div class="modal-animate relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
+                <div class="px-6 py-4 bg-etholBg border-b border-slate-200 flex items-center justify-between">
+                    <h3 id="form-modal-title" class="text-base font-bold text-slate-900">Tambah Poster Baru</h3>
+                    <button onclick="closePosterFormModal()" class="w-8 h-8 rounded-lg hover:bg-slate-200 text-slate-500 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+
+                <form id="poster-form" class="p-6 space-y-4 max-h-[82vh] overflow-y-auto">
+                    <input type="hidden" id="edit-poster-id" value="">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1.5">Judul Poster *</label>
+                        <input type="text" id="input-title" required placeholder="Contoh: Pelatihan PLC..."
+                            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-[#FF0000]">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1.5">Kategori *</label>
+                        <select id="input-category" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-[#FF0000]">
+                            <option value="Seminar/Workshop">Seminar & Pelatihan</option>
+                            <option value="Lomba">Lomba & Kompetisi</option>
+                            <option value="Lowongan/Magang">KP, Magang & Karir</option>
+                            <option value="Pengumuman">Info HIMA & Akademik</option>
+                        </select>
+                    </div>
+
+                    <div class="bg-etholBg p-4 rounded-xl border border-slate-200 space-y-3">
+                        <label class="block text-xs font-bold text-slate-800">Gambar Poster (Upload File / URL) *</label>
+                        <div class="relative border-2 border-dashed border-slate-300 hover:border-[#FF0000] bg-white rounded-xl p-4 text-center transition cursor-pointer">
+                            <input type="file" id="input-image-file" accept="image/*" onchange="handleImageFileUpload(event)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                            <div class="text-slate-600 space-y-1">
+                                <i class="fa-solid fa-cloud-arrow-up text-2xl text-[#FF0000]"></i>
+                                <p class="text-xs font-semibold text-slate-800">Klik atau seret file poster</p>
+                            </div>
+                        </div>
+                        <div id="compression-stats" class="hidden p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 flex items-center justify-between">
+                            <p id="compression-detail" class="font-semibold">Kompresi Berhasil</p>
+                            <img id="compression-preview-thumb" src="" alt="Preview" class="w-10 h-12 object-cover rounded border">
+                        </div>
+                        <input type="text" id="input-image" required placeholder="https://..." class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs font-mono">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1.5">Deskripsi Lengkap *</label>
+                        <textarea id="input-desc" rows="3" required placeholder="Detail kegiatan..." class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-[#FF0000]"></textarea>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Nama CP *</label>
+                            <input type="text" id="input-cp" required placeholder="Contoh: Mas Dimas" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-[#FF0000]">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Nomor WhatsApp *</label>
+                            <input type="tel" id="input-wa" required placeholder="0812..." class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-[#FF0000]">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1.5">Link Pendaftaran *</label>
+                        <input type="text" id="input-link" required placeholder="https://..." class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-[#FF0000]">
+                    </div>
+
+                    <div class="pt-3 border-t border-slate-200 flex items-center justify-end gap-3">
+                        <button type="button" onclick="closePosterFormModal()" class="px-4 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 transition">Batal</button>
+                        <button type="submit" id="btn-submit-poster" class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-[#FF0000] hover:bg-[#D40000] text-white shadow-md transition">Simpan & Publikasikan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 4: BACKUP & PASSWORD -->
+    <div id="sync-modal" class="fixed inset-0 z-50 hidden overflow-y-auto" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 bg-slate-950/75 backdrop-blur-sm transition-opacity" onclick="closeDataSyncModal()"></div>
+        <div class="flex min-h-full items-center justify-center p-4">
+            <div class="modal-animate relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
+                <div class="px-6 py-4 bg-etholBg border-b border-slate-200 flex items-center justify-between">
+                    <h3 class="text-base font-bold text-slate-900">Cadangan Data & Keamanan Admin</h3>
+                    <button onclick="closeDataSyncModal()" class="w-8 h-8 rounded-lg hover:bg-slate-200 text-slate-500 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <div class="p-6 space-y-6">
+                    <div class="space-y-2">
+                        <h4 class="text-xs font-bold uppercase text-[#FF0000]">Cadangan Data JSON</h4>
+                        <div class="flex gap-3 pt-1">
+                            <button type="button" onclick="exportDataJSON()" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold">Ekspor JSON</button>
+                            <label class="px-4 py-2 rounded-xl bg-red-50 hover:bg-red-100 text-red-800 border border-red-200 text-xs font-semibold cursor-pointer">
+                                Impor JSON
+                                <input type="file" accept=".json" onchange="importDataJSON(event)" class="hidden">
+                            </label>
+                        </div>
+                    </div>
+
+                    <hr class="border-slate-200">
+
+                    <form id="change-password-form" class="space-y-3">
+                        <h4 class="text-xs font-bold uppercase text-[#FF0000]">Ubah Kata Sandi Admin</h4>
+                        <div class="flex gap-2.5">
+                            <input type="password" id="new-admin-password" minlength="4" required placeholder="Password baru (min. 4 karakter)"
+                                class="flex-grow px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs">
+                            <button type="submit" class="px-4 py-2 rounded-xl bg-slate-900 text-white text-xs font-semibold">Simpan</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =====================================================================
+         JAVASCRIPT AUTO-SYNC SUPABASE CLOUD
+    ====================================================================== -->
+    <script>
+        // =================================================================
+        // KONFIGURASI SUPABASE CLOUD (MASUKKAN URL & PUBLISHABLE KEY KAMU)
+        // =================================================================
+        const SUPABASE_CONFIG = {
+            URL: "https://fhqcszpsoxusmibrssvo.supabase.co",     // Contoh: "https://xyzabcdef.supabase.co"
+            ANON_KEY: "sb_publishable_9Ur3Y5O-RNnk8GCnUfgxmA_Z7LnmoYK",    // Contoh: "sb_publishable_..."
+            TABLE: "posters"
+        };
+
+        const isCloudConfigured = () => {
+            return SUPABASE_CONFIG.URL.startsWith("https://") && 
+                   !SUPABASE_CONFIG.URL.includes("MASUKKAN_") &&
+                   SUPABASE_CONFIG.ANON_KEY.length > 10;
+        };
+
+        const defaultPosters = [
+            {
+                id: 1,
+                title: "Industrial Automation & PLC Training 2026 — HIMA ELIN PENS",
+                category: "Seminar/Workshop",
+                date: "18 Nov 2026",
+                image: "https://placehold.co/600x800/990000/ffffff?text=PLC+TRAINING+ELIN",
+                description: "Pelatihan intensif otomasi industri untuk mahasiswa Elektro Industri PENS.",
+                cpName: "Mas Dimas (Kadep Ristek)",
+                whatsapp: "6281234567890",
+                link: "https://pens.ac.id"
+            }
+        ];
+
+        const STORAGE_KEYS = {
+            POSTERS: "hima_elin_pens_posters_cache_v1",
+            ADMIN_PASS: "hima_elin_admin_pass_v1",
+            ADMIN_SESSION: "hima_elin_admin_logged_in"
+        };
+
+        let posters = [];
+        let currentCategory = "Semua";
+        let searchQuery = "";
+        let isAdminLoggedIn = false;
+        let logoTapCount = 0;
+        let logoTapTimer = null;
+
+        document.addEventListener("DOMContentLoaded", async () => {
+            loadAdminState();
+            setupEventListeners();
+            updateCloudStatusBadges();
+
+            loadPostersFromLocalCache();
+            renderPosters();
+
+            if (isCloudConfigured()) {
+                await fetchPostersFromCloud(false);
+            }
+        });
+
+        function updateCloudStatusBadges() {
+            const pubBadge = document.getElementById("public-sync-indicator");
+            const admBadge = document.getElementById("admin-cloud-badge");
+
+            if (isCloudConfigured()) {
+                if (pubBadge) {
+                    pubBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Online Cloud`;
+                    pubBadge.className = "hidden md:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] font-semibold";
+                }
+                if (admBadge) {
+                    admBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Auto-Save Cloud Aktif`;
+                    admBadge.className = "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-500/20 text-emerald-300 font-medium";
+                }
+            } else {
+                if (pubBadge) {
+                    pubBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-500"></span> Mode Lokal`;
+                }
+            }
+        }
+
+        function getSupabaseHeaders(extra = {}) {
+            return {
+                "Content-Type": "application/json",
+                "apikey": SUPABASE_CONFIG.ANON_KEY,
+                "Authorization": `Bearer ${SUPABASE_CONFIG.ANON_KEY}`,
+                ...extra
+            };
+        }
+
+        async function fetchPostersFromCloud(manualTrigger = false) {
+            if (!isCloudConfigured()) {
+                if (manualTrigger) showToast("URL/Key Supabase belum diisi.", "error");
+                return;
+            }
+
+            if (manualTrigger) showToast("Menyinkronkan data dari cloud...", "info");
+
+            try {
+                const endpoint = `${SUPABASE_CONFIG.URL}/rest/v1/${SUPABASE_CONFIG.TABLE}?select=*&order=id.desc`;
+                const response = await fetch(endpoint, {
+                    method: "GET",
+                    headers: getSupabaseHeaders()
+                });
+
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const data = await response.json();
+
+                if (Array.isArray(data)) {
+                    posters = data.map(row => ({
+                        id: Number(row.id),
+                        title: row.title,
+                        category: row.category,
+                        date: row.date,
+                        image: row.image,
+                        description: row.description,
+                        cpName: row.cp_name,
+                        whatsapp: row.whatsapp,
+                        link: row.link
+                    }));
+                    savePostersToLocalCache();
+                    renderPosters();
+                    if (manualTrigger) showToast(`Berhasil memuat ${posters.length} poster online!`, "success");
+                }
+            } catch (err) {
+                console.error("Cloud Fetch Error:", err);
+                if (manualTrigger) showToast("Gagal terhubung ke Supabase. Cek URL/Key & RLS Policy.", "error");
+            }
+        }
+
+        async function upsertPosterToCloud(posterObj) {
+            if (!isCloudConfigured()) return true;
+
+            try {
+                const payload = {
+                    id: posterObj.id,
+                    title: posterObj.title,
+                    category: posterObj.category,
+                    date: posterObj.date,
+                    image: posterObj.image,
+                    description: posterObj.description,
+                    cp_name: posterObj.cpName,
+                    whatsapp: posterObj.whatsapp,
+                    link: posterObj.link
+                };
+
+                const endpoint = `${SUPABASE_CONFIG.URL}/rest/v1/${SUPABASE_CONFIG.TABLE}`;
+                const response = await fetch(endpoint, {
+                    method: "POST",
+                    headers: getSupabaseHeaders({ "Prefer": "resolution=merge-duplicates" }),
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                return true;
+            } catch (err) {
+                console.error("Cloud Save Error:", err);
+                showToast("Gagal menyimpan ke server cloud!", "error");
+                return false;
+            }
+        }
+
+        async function deletePosterFromCloud(posterId) {
+            if (!isCloudConfigured()) return true;
+
+            try {
+                const endpoint = `${SUPABASE_CONFIG.URL}/rest/v1/${SUPABASE_CONFIG.TABLE}?id=eq.${posterId}`;
+                const response = await fetch(endpoint, {
+                    method: "DELETE",
+                    headers: getSupabaseHeaders()
+                });
+
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                return true;
+            } catch (err) {
+                console.error("Cloud Delete Error:", err);
+                showToast("Gagal menghapus dari server cloud.", "error");
+                return false;
+            }
+        }
+
+        function loadPostersFromLocalCache() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEYS.POSTERS);
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        posters = parsed;
+                        return;
+                    }
+                }
+                posters = [...defaultPosters];
+            } catch (e) {
+                posters = [...defaultPosters];
+            }
+        }
+
+        function savePostersToLocalCache() {
+            try {
+                localStorage.setItem(STORAGE_KEYS.POSTERS, JSON.stringify(posters));
+            } catch (e) {}
+        }
+
+        async function handlePosterFormSubmit(e) {
+            e.preventDefault();
+            if (!isAdminLoggedIn) return;
+
+            const btnSubmit = document.getElementById("btn-submit-poster");
+            const originalText = btnSubmit.innerHTML;
+            btnSubmit.disabled = true;
+            btnSubmit.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i> Menyimpan ke Cloud...`;
+
+            const editId = document.getElementById("edit-poster-id").value;
+            const title = document.getElementById("input-title").value.trim();
+            const category = document.getElementById("input-category").value;
+            const image = document.getElementById("input-image").value.trim();
+            const description = document.getElementById("input-desc").value.trim();
+            const cpName = document.getElementById("input-cp").value.trim();
+            const whatsapp = formatWhatsAppNumber(document.getElementById("input-wa").value.trim());
+            const link = normalizeUrl(document.getElementById("input-link").value.trim());
+
+            let targetPoster;
+
+            if (editId) {
+                const idx = posters.findIndex(p => p.id === Number(editId));
+                if (idx !== -1) {
+                    targetPoster = { ...posters[idx], title, category, image, description, cpName, whatsapp, link };
+                    posters[idx] = targetPoster;
+                }
+            } else {
+                const today = new Date();
+                const months = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+                targetPoster = {
+                    id: Date.now(),
+                    title,
+                    category,
+                    date: `${today.getDate()} ${months[today.getMonth()]} ${today.getFullYear()}`,
+                    image,
+                    description,
+                    cpName,
+                    whatsapp,
+                    link
+                };
+                posters.unshift(targetPoster);
+            }
+
+            const cloudSuccess = await upsertPosterToCloud(targetPoster);
+            savePostersToLocalCache();
+            
+            btnSubmit.disabled = false;
+            btnSubmit.innerHTML = originalText;
+
+            closePosterFormModal();
+            renderPosters();
+
+            if (cloudSuccess) {
+                showToast(editId ? "Perubahan tersimpan & langsung tayang!" : "Poster baru dipublikasikan!", "success");
+            }
+        }
+
+        async function deletePoster(id) {
+            if (!isAdminLoggedIn) return;
+            
+            showToast("Menghapus poster...", "info");
+            const cloudSuccess = await deletePosterFromCloud(id);
+            
+            if (cloudSuccess) {
+                posters = posters.filter(p => p.id !== id);
+                savePostersToLocalCache();
+                closeDetailModal();
+                renderPosters();
+                showToast("Poster berhasil dihapus.", "success");
+            }
+        }
+
+        function toggleMobileSidebar() {
+            const sidebar = document.getElementById("app-sidebar");
+            const backdrop = document.getElementById("sidebar-backdrop");
+            if (sidebar.classList.contains("-translate-x-full")) {
+                sidebar.classList.remove("-translate-x-full");
+                backdrop.classList.remove("hidden");
+            } else {
+                sidebar.classList.add("-translate-x-full");
+                backdrop.classList.add("hidden");
+            }
+        }
+
+        function setActiveCategory(category) {
+            currentCategory = category;
+            document.querySelectorAll(".sidebar-nav-btn").forEach(btn => {
+                const isMatch = btn.getAttribute("data-category") === category;
+                btn.className = isMatch 
+                    ? "sidebar-nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold bg-red-50 text-[#FF0000] transition"
+                    : "sidebar-nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition";
+            });
+
+            document.querySelectorAll(".mobile-pill").forEach(pill => {
+                const isMatch = pill.getAttribute("data-category") === category;
+                pill.className = isMatch
+                    ? "mobile-pill px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#FF0000] text-white whitespace-nowrap"
+                    : "mobile-pill px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-100 text-slate-700 whitespace-nowrap";
+            });
+
+            const labelMap = { "Semua": "Semua Informasi Aktif", "Seminar/Workshop": "Seminar & Pelatihan", "Lomba": "Lomba & Kompetisi", "Lowongan/Magang": "KP, Magang & Karir", "Pengumuman": "Info HIMA & Akademik" };
+            document.getElementById("breadcrumb-category").textContent = labelMap[category] || category;
+            document.getElementById("section-active-title").textContent = labelMap[category] || category;
+
+            renderPosters();
+            if (window.innerWidth < 1024) toggleMobileSidebar();
+        }
+
+        function selectCategoryFromCard(category) {
+            setActiveCategory(category);
+            document.getElementById("section-active-title").scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
+
+        function updateDashboardCounters() {
+            document.getElementById("count-all").textContent = posters.length;
+            document.getElementById("count-seminar").textContent = posters.filter(p => p.category === "Seminar/Workshop").length;
+            document.getElementById("count-lomba").textContent = posters.filter(p => p.category === "Lomba").length;
+            document.getElementById("count-magang").textContent = posters.filter(p => p.category === "Lowongan/Magang").length;
+            document.getElementById("count-pengumuman").textContent = posters.filter(p => p.category === "Pengumuman").length;
+
+            document.getElementById("stat-total").textContent = posters.length;
+            document.getElementById("stat-seminar").textContent = posters.filter(p => p.category === "Seminar/Workshop").length;
+            document.getElementById("stat-lomba").textContent = posters.filter(p => p.category === "Lomba").length;
+            document.getElementById("stat-magang").textContent = posters.filter(p => p.category === "Lowongan/Magang").length;
+        }
+
+        function handleSecretLogoTap() {
+            if (isAdminLoggedIn) return;
+            logoTapCount++;
+            clearTimeout(logoTapTimer);
+            if (logoTapCount >= 5) {
+                logoTapCount = 0;
+                openLoginModal();
+            } else {
+                logoTapTimer = setTimeout(() => { logoTapCount = 0; }, 1500);
+            }
+        }
+
+        function loadAdminState() {
+            isAdminLoggedIn = sessionStorage.getItem(STORAGE_KEYS.ADMIN_SESSION) === "true";
+            updateAdminUI();
+        }
+
+        function getAdminPassword() {
+            return localStorage.getItem(STORAGE_KEYS.ADMIN_PASS) || "admin123";
+        }
+
+        function updateAdminUI() {
+            const adminToolbar = document.getElementById("admin-toolbar");
+            const modalAdminActions = document.getElementById("modal-admin-actions");
+            const roleTitle = document.getElementById("sidebar-role-title");
+            const roleSubtitle = document.getElementById("sidebar-role-subtitle");
+            const rolePill = document.getElementById("sidebar-role-pill");
+            const avatarBadge = document.getElementById("user-avatar-badge");
+
+            if (isAdminLoggedIn) {
+                if (adminToolbar) { adminToolbar.classList.remove("hidden"); adminToolbar.classList.add("flex"); }
+                if (modalAdminActions) modalAdminActions.classList.remove("hidden");
+                if (roleTitle) roleTitle.textContent = "Admin Dep. RISTEK";
+                if (roleSubtitle) roleSubtitle.textContent = "HIMA ELIN PENS";
+                if (rolePill) {
+                    rolePill.textContent = "Mode Pengelola Aktif";
+                    rolePill.className = "inline-block mt-1 text-[10px] font-semibold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300";
+                }
+                if (avatarBadge) avatarBadge.innerHTML = '<i class="fa-solid fa-shield-halved"></i>';
+            } else {
+                if (adminToolbar) { adminToolbar.classList.add("hidden"); adminToolbar.classList.remove("flex"); }
+                if (modalAdminActions) modalAdminActions.classList.add("hidden");
+                if (roleTitle) roleTitle.textContent = "Mahasiswa & Umum";
+                if (roleSubtitle) roleSubtitle.textContent = "Teknik Elektro Industri";
+                if (rolePill) {
+                    rolePill.textContent = "Akses Publik Aktif";
+                    rolePill.className = "inline-block mt-1 text-[10px] font-semibold px-2 py-0.5 rounded bg-white/10 text-red-200";
+                }
+                if (avatarBadge) avatarBadge.innerHTML = '<i class="fa-solid fa-bolt"></i>';
+            }
+            if (typeof posters !== 'undefined' && posters.length > 0) renderPosters();
+        }
+
+        function openLoginModal() {
+            document.getElementById("login-modal").classList.remove("hidden");
+            document.getElementById("admin-password-input").value = "";
+            setTimeout(() => document.getElementById("admin-password-input").focus(), 100);
+        }
+
+        function closeLoginModal() { document.getElementById("login-modal").classList.add("hidden"); }
+
+        function togglePasswordVisibility() {
+            const input = document.getElementById("admin-password-input");
+            const icon = document.getElementById("eye-icon");
+            if (input.type === "password") { input.type = "text"; icon.classList.replace("fa-eye", "fa-eye-slash"); }
+            else { input.type = "password"; icon.classList.replace("fa-eye-slash", "fa-eye"); }
+        }
+
+        function logoutAdmin() {
+            isAdminLoggedIn = false;
+            sessionStorage.removeItem(STORAGE_KEYS.ADMIN_SESSION);
+            updateAdminUI();
+            closeDetailModal();
+            showToast("Mode Admin dinonaktifkan.", "info");
+        }
+
+        function exportDataJSON() {
+            const dataStr = JSON.stringify(posters, null, 2);
+            const blob = new Blob([dataStr], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url; a.download = `hima-elin-backup.json`;
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast("File JSON diunduh!", "success");
+        }
+
+        async function importDataJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    if (Array.isArray(imported)) {
+                        posters = imported;
+                        savePostersToLocalCache();
+                        for (const p of posters) {
+                            await upsertPosterToCloud(p);
+                        }
+                        renderPosters();
+                        closeDataSyncModal();
+                        showToast(`Berhasil mengimpor & sync ${imported.length} poster!`, "success");
+                    }
+                } catch (err) { showToast("Format file salah.", "error"); }
+            };
+            reader.readAsText(file);
+        }
+
+        function openDataSyncModal() { document.getElementById("sync-modal").classList.remove("hidden"); }
+        function closeDataSyncModal() { document.getElementById("sync-modal").classList.add("hidden"); }
+
+        function handleImageFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement("canvas");
+                    let w = img.width, h = img.height;
+                    if (w > 900) { h = Math.round((h * 900) / w); w = 900; }
+                    canvas.width = w; canvas.height = h;
+                    canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+                    const compressed = canvas.toDataURL("image/jpeg", 0.78);
+                    document.getElementById("input-image").value = compressed;
+                    document.getElementById("compression-preview-thumb").src = compressed;
+                    document.getElementById("compression-stats").classList.remove("hidden");
+                    showToast("Gambar berhasil dikompresi!", "success");
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function renderPosters() {
+            updateDashboardCounters();
+            const grid = document.getElementById("poster-grid");
+            const emptyState = document.getElementById("empty-state");
+            const countEl = document.getElementById("poster-count");
+
+            const filtered = posters.filter(poster => {
+                const matchCategory = currentCategory === "Semua" || poster.category === currentCategory;
+                const q = searchQuery.toLowerCase();
+                const matchSearch = poster.title.toLowerCase().includes(q) || poster.description.toLowerCase().includes(q);
+                return matchCategory && matchSearch;
+            });
+
+            countEl.textContent = filtered.length;
+            grid.innerHTML = "";
+
+            if (filtered.length === 0) {
+                grid.classList.add("hidden");
+                emptyState.classList.remove("hidden");
+                return;
+            }
+
+            grid.classList.remove("hidden");
+            emptyState.classList.add("hidden");
+
+            filtered.forEach(poster => {
+                const card = document.createElement("article");
+                card.className = "group bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs hover:shadow-lg hover:border-[#FF0000] hover:-translate-y-1 transition-all cursor-pointer flex flex-col relative";
+                card.onclick = () => openDetailModal(poster.id);
+
+                const adminControls = isAdminLoggedIn ? `
+                    <div class="absolute top-3 right-3 z-20 flex gap-1.5" onclick="event.stopPropagation()">
+                        <button type="button" onclick="openPosterFormModal(${poster.id})" class="w-8 h-8 rounded-lg bg-amber-500 text-white flex items-center justify-center shadow"><i class="fa-solid fa-pen text-xs"></i></button>
+                        <button type="button" onclick="deletePoster(${poster.id})" class="w-8 h-8 rounded-lg bg-[#FF0000] text-white flex items-center justify-center shadow"><i class="fa-regular fa-trash-can text-xs"></i></button>
+                    </div>` : "";
+
+                card.innerHTML = `
+                    ${adminControls}
+                    <div class="relative aspect-[3/4] w-full bg-slate-900 overflow-hidden">
+                        <img src="${poster.image}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                    </div>
+                    <div class="p-4 flex-grow flex flex-col justify-between bg-white">
+                        <div>
+                            <span class="text-[11px] font-semibold text-[#FF0000]">${poster.category}</span>
+                            <h3 class="font-bold text-slate-900 text-sm line-clamp-2 mt-1">${poster.title}</h3>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+                            <span><i class="fa-regular fa-user text-[#FF0000]"></i> ${poster.cpName}</span>
+                            <span class="text-[#FF0000] font-bold">Detail →</span>
+                        </div>
+                    </div>`;
+                grid.appendChild(card);
+            });
+        }
+
+        function setupEventListeners() {
+            document.querySelectorAll(".sidebar-nav-btn").forEach(btn => {
+                btn.addEventListener("click", () => setActiveCategory(btn.getAttribute("data-category")));
+            });
+            document.querySelectorAll(".mobile-pill").forEach(pill => {
+                pill.addEventListener("click", () => setActiveCategory(pill.getAttribute("data-category")));
+            });
+
+            const searchDesktop = document.getElementById("search-input");
+            const searchMobile = document.getElementById("search-input-mobile");
+            searchDesktop.addEventListener("input", (e) => { searchQuery = e.target.value; searchMobile.value = searchQuery; renderPosters(); });
+            searchMobile.addEventListener("input", (e) => { searchQuery = e.target.value; searchDesktop.value = searchQuery; renderPosters(); });
+
+            document.getElementById("login-form").addEventListener("submit", (e) => {
+                e.preventDefault();
+                if (document.getElementById("admin-password-input").value === getAdminPassword()) {
+                    isAdminLoggedIn = true;
+                    sessionStorage.setItem(STORAGE_KEYS.ADMIN_SESSION, "true");
+                    updateAdminUI();
+                    closeLoginModal();
+                    showToast("Login berhasil! Mode Admin aktif.", "success");
+                } else {
+                    showToast("Kata sandi salah!", "error");
+                }
+            });
+
+            document.getElementById("change-password-form").addEventListener("submit", (e) => {
+                e.preventDefault();
+                const newPass = document.getElementById("new-admin-password").value.trim();
+                if (newPass.length >= 4) {
+                    localStorage.setItem(STORAGE_KEYS.ADMIN_PASS, newPass);
+                    e.target.reset();
+                    showToast("Password admin diperbarui!", "success");
+                }
+            });
+
+            document.getElementById("poster-form").addEventListener("submit", handlePosterFormSubmit);
+        }
+
+        function resetFilters() {
+            searchQuery = "";
+            document.getElementById("search-input").value = "";
+            document.getElementById("search-input-mobile").value = "";
+            setActiveCategory("Semua");
+        }
+
+        function openDetailModal(id) {
+            const poster = posters.find(p => p.id === id);
+            if (!poster) return;
+            document.getElementById("modal-poster-img").src = poster.image;
+            document.getElementById("modal-poster-category").textContent = poster.category;
+            document.getElementById("modal-poster-date").innerHTML = `<i class="fa-regular fa-calendar"></i> ${poster.date}`;
+            document.getElementById("modal-poster-title").textContent = poster.title;
+            document.getElementById("modal-poster-desc").textContent = poster.description;
+            document.getElementById("modal-poster-cp").textContent = poster.cpName;
+            document.getElementById("modal-poster-phone-display").textContent = "+" + poster.whatsapp;
+            document.getElementById("modal-btn-wa").href = `https://wa.me/${poster.whatsapp}?text=Halo%20${encodeURIComponent(poster.cpName)}`;
+            document.getElementById("modal-btn-link").href = poster.link;
+
+            const adminActions = document.getElementById("modal-admin-actions");
+            if (isAdminLoggedIn) {
+                adminActions.classList.remove("hidden");
+                document.getElementById("modal-btn-edit").onclick = () => { closeDetailModal(); openPosterFormModal(poster.id); };
+                document.getElementById("modal-btn-delete").onclick = () => deletePoster(poster.id);
+            } else {
+                adminActions.classList.add("hidden");
+            }
+            document.getElementById("detail-modal").classList.remove("hidden");
+        }
+
+        function closeDetailModal() { document.getElementById("detail-modal").classList.add("hidden"); }
+
+        function openPosterFormModal(editId = null) {
+            if (!isAdminLoggedIn) { openLoginModal(); return; }
+            document.getElementById("poster-form").reset();
+            document.getElementById("compression-stats").classList.add("hidden");
+            document.getElementById("edit-poster-id").value = "";
+
+            if (editId) {
+                const poster = posters.find(p => p.id === editId);
+                if (poster) {
+                    document.getElementById("form-modal-title").textContent = "Edit Poster";
+                    document.getElementById("edit-poster-id").value = poster.id;
+                    document.getElementById("input-title").value = poster.title;
+                    document.getElementById("input-category").value = poster.category;
+                    document.getElementById("input-image").value = poster.image;
+                    document.getElementById("input-desc").value = poster.description;
+                    document.getElementById("input-cp").value = poster.cpName;
+                    document.getElementById("input-wa").value = poster.whatsapp;
+                    document.getElementById("input-link").value = poster.link;
+                }
+            } else {
+                document.getElementById("form-modal-title").textContent = "Tambah Poster Baru";
+            }
+            document.getElementById("poster-form-modal").classList.remove("hidden");
+        }
+
+        function closePosterFormModal() { document.getElementById("poster-form-modal").classList.add("hidden"); }
+
+        function formatWhatsAppNumber(phone) {
+            let cleaned = phone.replace(/\D/g, "");
+            if (cleaned.startsWith("0")) cleaned = "62" + cleaned.substring(1);
+            else if (!cleaned.startsWith("62")) cleaned = "62" + cleaned;
+            return cleaned;
+        }
+
+        function normalizeUrl(url) {
+            if (!url) return "#";
+            if (!/^https?:\/\//i.test(url)) return "https://" + url;
+            return url;
+        }
+
+        function showToast(message, type = "success") {
+            const container = document.getElementById("toast-container");
+            const toast = document.createElement("div");
+            toast.className = `bg-slate-900 text-white px-4 py-3 rounded-xl shadow-lg text-sm font-medium flex items-center gap-2.5`;
+            toast.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400"></i> <span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3200);
+        }
+    </script>
+</body>
+</html>
