@@ -919,34 +919,36 @@
         }
 
         function updateAdminUI() {
-            const adminToolbar = document.getElementById("admin-toolbar");
-            const modalAdminActions = document.getElementById("modal-admin-actions");
-            const roleTitle = document.getElementById("sidebar-role-title");
-            const roleSubtitle = document.getElementById("sidebar-role-subtitle");
-            const rolePill = document.getElementById("sidebar-role-pill");
-            const avatarBadge = document.getElementById("user-avatar-badge");
+    const adminToolbar = document.getElementById("admin-toolbar");
+    const modalAdminActions = document.getElementById("modal-admin-actions");
+    const roleTitle = document.getElementById("sidebar-role-title");
+    const roleSubtitle = document.getElementById("sidebar-role-subtitle");
+    const rolePill = document.getElementById("sidebar-role-pill");
+    const avatarBadge = document.getElementById("user-avatar-badge");
 
-            if (isAdminLoggedIn) {
-                adminToolbar.classList.remove("hidden");
-                adminToolbar.classList.add("flex");
-                if (modalAdminActions) modalAdminActions.classList.remove("hidden");
-                roleTitle.textContent = "Admin Dep. RISTEK";
-                roleSubtitle.textContent = "HIMA ELIN PENS";
-                rolePill.textContent = "Mode Pengelola Aktif";
-                rolePill.className = "inline-block mt-1 text-[10px] font-semibold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300";
-                avatarBadge.innerHTML = '<i class="fa-solid fa-shield-halved"></i>';
-            } else {
-                adminToolbar.classList.add("hidden");
-                adminToolbar.classList.remove("flex");
-                if (modalAdminActions) modalAdminActions.classList.add("hidden");
-                roleTitle.textContent = "Mahasiswa & Umum";
-                roleSubtitle.textContent = "Teknik Elektro Industri";
-                rolePill.textContent = "Akses Publik Aktif";
-                rolePill.className = "inline-block mt-1 text-[10px] font-semibold px-2 py-0.5 rounded bg-white/10 text-red-200";
-                avatarBadge.innerHTML = '<i class="fa-solid fa-bolt"></i>';
-            }
-            if (posters.length > 0) renderPosters();
+    if (isAdminLoggedIn) {
+        if (adminToolbar) { adminToolbar.classList.remove("hidden"); adminToolbar.classList.add("flex"); }
+        if (modalAdminActions) modalAdminActions.classList.remove("hidden");
+        if (roleTitle) roleTitle.textContent = "Admin Dep. RISTEK";
+        if (roleSubtitle) roleSubtitle.textContent = "HIMA ELIN PENS";
+        if (rolePill) {
+            rolePill.textContent = "Mode Pengelola Aktif";
+            rolePill.className = "inline-block mt-1 text-[10px] font-semibold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300";
         }
+        if (avatarBadge) avatarBadge.innerHTML = '<i class="fa-solid fa-shield-halved"></i>';
+    } else {
+        if (adminToolbar) { adminToolbar.classList.add("hidden"); adminToolbar.classList.remove("flex"); }
+        if (modalAdminActions) modalAdminActions.classList.add("hidden");
+        if (roleTitle) roleTitle.textContent = "Mahasiswa & Umum";
+        if (roleSubtitle) roleSubtitle.textContent = "Teknik Elektro Industri";
+        if (rolePill) {
+            rolePill.textContent = "Akses Publik Aktif";
+            rolePill.className = "inline-block mt-1 text-[10px] font-semibold px-2 py-0.5 rounded bg-white/10 text-red-200";
+        }
+        if (avatarBadge) avatarBadge.innerHTML = '<i class="fa-solid fa-bolt"></i>';
+    }
+    if (typeof posters !== 'undefined' && posters.length > 0) renderPosters();
+}
 
         function openLoginModal() {
             document.getElementById("login-modal").classList.remove("hidden");
