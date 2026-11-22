@@ -1,0 +1,2442 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>InfoHub HIMA ELIN PENS — Dashboard Informasi Digital</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome untuk Ikon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#FF0000',
+                        primaryHover: '#D40000',
+                        etholBg: '#F4F6F9',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #F1F5F9; }
+        ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #FF0000; }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.96) translateY(8px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .modal-animate { animation: modalFadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    </style>
+</head>
+<body class="bg-etholBg text-slate-800 font-sans antialiased min-h-[100dvh] flex overflow-x-hidden">
+
+    <!-- Notifikasi Toast -->
+    <div id="toast-container" class="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-5 sm:bottom-5 z-50 flex flex-col items-center sm:items-end gap-2 pointer-events-none"></div>
+
+    <!-- Backdrop Sidebar Mobile -->
+    <div id="sidebar-backdrop" onclick="toggleMobileSidebar()" class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-30 hidden lg:hidden transition-opacity"></div>
+
+    <!-- =====================================================================
+         SIDEBAR NAVIGASI KIRI (GAYA DASHBOARD ETHOL PENS)
+    ====================================================================== -->
+    <aside id="app-sidebar" class="fixed lg:sticky top-0 left-0 z-40 h-[100dvh] lg:h-screen w-[82vw] max-w-72 bg-white border-r border-slate-200 flex flex-col justify-between transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out shrink-0 shadow-xl lg:shadow-none">
+        
+        <div class="overflow-y-auto flex-grow">
+            <!-- Header Sidebar & Logo -->
+            <div class="h-16 px-4 sm:px-5 border-b border-slate-200 flex items-center justify-between">
+                <div id="brand-logo-trigger" onclick="handleSecretLogoTap()" class="flex items-center gap-3 cursor-pointer select-none group" title="HIMA ELIN PENS InfoHub">
+                    <div class="w-10 h-10 rounded-xl bg-white group-active:scale-95 transition-transform flex items-center justify-center shadow-sm border border-slate-200 shrink-0 overflow-hidden">
+                        <img src="logo-hima-elin.jpg" alt="Logo HIMA ELIN PENS" 
+                             onerror="this.onerror=null; this.src='https://placehold.co/100x100/FF0000/ffffff?text=ELIN';"
+                             class="w-full h-full object-contain p-0.5">
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="font-extrabold text-base text-slate-900 tracking-tight">HIMA <span class="text-[#FF0000]">ELIN</span></span>
+                            <span class="text-[10px] font-bold bg-red-50 text-[#FF0000] border border-red-200 px-1.5 py-0.5 rounded">PENS</span>
+                        </div>
+                        <p class="text-[11px] text-slate-500 font-medium leading-none mt-0.5">InfoHub</p>
+                    </div>
+                </div>
+                <button onclick="toggleMobileSidebar()" aria-label="Tutup Menu" class="lg:hidden w-9 h-9 rounded-xl text-slate-500 hover:text-slate-800 hover:bg-slate-100 flex items-center justify-center">
+                    <i class="fa-solid fa-xmark text-base"></i>
+                </button>
+            </div>
+
+            <!-- Kartu Status Pengguna -->
+            <div class="p-3.5 sm:p-4">
+                <div id="sidebar-user-card" class="bg-gradient-to-br from-slate-900 to-slate-800 rounded-xl p-3.5 text-white shadow-sm relative overflow-hidden">
+                    <div class="absolute -right-4 -bottom-4 w-16 h-16 bg-[#FF0000]/20 rounded-full blur-md"></div>
+                    <div class="flex items-center gap-3 relative z-10">
+                        <div id="user-avatar-badge" class="w-10 h-10 rounded-lg bg-[#FF0000] flex items-center justify-center text-white font-bold text-sm shrink-0 shadow">
+                            <i class="fa-solid fa-bolt"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <p id="sidebar-role-title" class="text-xs font-bold text-white truncate">Mahasiswa & Umum</p>
+                            <p id="sidebar-role-subtitle" class="text-[11px] text-slate-300 truncate">Teknik Elektro Industri</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Menu Kategori Sidebar -->
+            <div class="px-3 pb-4">
+                <p class="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">Menu Informasi</p>
+                <nav class="space-y-1" id="sidebar-category-nav">
+                    <button data-category="Semua" class="sidebar-nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold bg-red-50 text-[#FF0000] transition">
+                        <span class="flex items-center gap-3">
+                            <i class="fa-solid fa-table-columns w-4 text-center"></i>
+                            <span>Semua Informasi</span>
+                        </span>
+                        <span id="count-all" class="text-xs font-bold px-2 py-0.5 rounded-full bg-[#FF0000] text-white">0</span>
+                    </button>
+
+                    <button data-category="Seminar/Workshop" class="sidebar-nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition">
+                        <span class="flex items-center gap-3">
+                            <i class="fa-solid fa-chalkboard-user w-4 text-center text-slate-400"></i>
+                            <span>Seminar & Pelatihan</span>
+                        </span>
+                        <span id="count-seminar" class="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">0</span>
+                    </button>
+
+                    <button data-category="Lomba" class="sidebar-nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition">
+                        <span class="flex items-center gap-3">
+                            <i class="fa-solid fa-trophy w-4 text-center text-slate-400"></i>
+                            <span>Lomba & Kompetisi</span>
+                        </span>
+                        <span id="count-lomba" class="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">0</span>
+                    </button>
+
+                    <button data-category="Lowongan/Magang" class="sidebar-nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition">
+                        <span class="flex items-center gap-3">
+                            <i class="fa-solid fa-briefcase w-4 text-center text-slate-400"></i>
+                            <span>KP, Magang & Karir</span>
+                        </span>
+                        <span id="count-magang" class="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">0</span>
+                    </button>
+
+                    <button data-category="Pengumuman" class="sidebar-nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition">
+                        <span class="flex items-center gap-3">
+                            <i class="fa-solid fa-bullhorn w-4 text-center text-slate-400"></i>
+                            <span>Info HIMA & Akademik</span>
+                        </span>
+                        <span id="count-pengumuman" class="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">0</span>
+                    </button>
+                </nav>
+
+                <!-- Menu Tab Tambahan: Video Edukasi & Funfact Jurusan -->
+                <p class="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 mt-5 mb-2">Media Pembelajaran</p>
+                <div class="space-y-1">
+                    <button id="sidebar-video-btn" onclick="switchToVideoView()" class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition">
+                        <span class="flex items-center gap-3">
+                            <i class="fa-solid fa-circle-play w-4 text-center text-[#FF0000]"></i>
+                            <span>Video Edukasi</span>
+                        </span>
+                        <span id="count-videos" class="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">0</span>
+                    </button>
+                </div>
+
+                <!-- Tautan Cepat PENS -->
+                <p class="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 mt-5 mb-2">Tautan Cepat PENS</p>
+                <div class="space-y-1 text-xs">
+                    <a href="https://ethol.pens.ac.id" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between px-3 py-2.5 rounded-lg text-slate-600 hover:bg-slate-100 hover:text-[#FF0000] transition">
+                        <span class="flex items-center gap-2.5"><i class="fa-solid fa-graduation-cap w-4 text-center text-sky-600"></i> ETHOL PENS</span>
+                        <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-slate-400"></i>
+                    </a>
+                    <a href="https://online.mis.pens.ac.id" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between px-3 py-2.5 rounded-lg text-slate-600 hover:bg-slate-100 hover:text-[#FF0000] transition">
+                        <span class="flex items-center gap-2.5"><i class="fa-solid fa-server w-4 text-center text-indigo-600"></i> Online MIS</span>
+                        <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-slate-400"></i>
+                    </a>
+                    <a href="https://elin.pens.ac.id" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between px-3 py-2.5 rounded-lg text-slate-600 hover:bg-slate-100 hover:text-[#FF0000] transition">
+                        <span class="flex items-center gap-2.5"><i class="fa-solid fa-microchip w-4 text-center text-[#FF0000]"></i> Prodi ELIN</span>
+                        <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-slate-400"></i>
+                    </a>
+                    <a href="https://dapidmr.it.student.pens.ac.id/Mis%20PENS/main.html" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between px-3 py-2.5 rounded-lg text-slate-600 hover:bg-slate-100 hover:text-[#FF0000] transition">
+                        <span class="flex items-center gap-2.5"><i class="fa-solid fa-book w-4 text-center text-[#0000FF]"></i> MIS PENS</span>
+                        <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-slate-400"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer Sidebar dengan Tombol Login Admin -->
+        <div class="p-3.5 sm:p-4 pb-[calc(0.875rem+env(safe-area-inset-bottom))] border-t border-slate-200 bg-slate-50/80 text-[11px] text-slate-500 flex items-center justify-between shrink-0">
+            <div>
+                <p class="font-semibold text-slate-700">HIMA ELIN PENS</p>
+                <p class="text-[10px] text-slate-400">Surabaya • 2026</p>
+            </div>
+            <button onclick="openLoginModal()" class="px-3 py-2 bg-slate-900 hover:bg-[#FF0000] text-white rounded-lg font-semibold text-[11px] transition flex items-center gap-1.5 shadow-xs">
+                <i class="fa-solid fa-lock text-[10px]"></i> Admin
+            </button>
+        </div>
+    </aside>
+
+    <!-- =====================================================================
+         KONTEN UTAMA
+    ====================================================================== -->
+    <div class="flex-1 flex flex-col min-w-0">
+        
+        <!-- Top Navbar -->
+        <header class="sticky top-0 z-20 h-14 sm:h-16 bg-white/95 backdrop-blur-md border-b border-slate-200 px-3.5 sm:px-6 lg:px-8 flex items-center justify-between gap-2.5 sm:gap-4">
+            <div class="flex items-center gap-2.5 sm:gap-3 min-w-0">
+                <button onclick="toggleMobileSidebar()" aria-label="Buka Menu Navigasi" class="lg:hidden w-9 h-9 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 active:scale-95 text-slate-700 flex items-center justify-center shrink-0 transition">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <div class="min-w-0">
+                    <div class="flex items-center gap-1.5 text-[10px] sm:text-[11px] text-slate-400 font-medium truncate">
+                        <span class="shrink-0">HIMA ELIN</span>
+                        <i class="fa-solid fa-chevron-right text-[8px] sm:text-[9px] shrink-0"></i>
+                        <span id="breadcrumb-category" class="text-[#FF0000] font-semibold truncate">Semua Informasi</span>
+                    </div>
+                    <h1 id="main-header-title" class="text-sm sm:text-lg font-bold text-slate-900 truncate leading-tight">
+                        Informasi Digital
+                    </h1>
+                </div>
+            </div>
+
+            <!-- Indikator Status Cloud Publik & Smart Search Desktop -->
+            <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+                <span id="public-sync-indicator" class="inline-flex items-center gap-1.5 px-2 sm:px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 text-[10px] sm:text-[11px] font-medium">
+                    <span class="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-slate-400"></span>
+                    <span>Memuat...</span>
+                </span>
+
+                <div id="search-wrapper-desktop" class="relative hidden sm:block w-60 md:w-72">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                        <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                    </div>
+                    <input type="text" id="search-input" autocomplete="off" placeholder="Cari fitur, lomba, video, CP..." 
+                        class="w-full pl-9 pr-8 py-1.5 bg-etholBg border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#FF0000]/20 focus:border-[#FF0000] transition">
+                    <button type="button" id="clear-search-desktop" onclick="clearSearchInput()" class="hidden absolute inset-y-0 right-0 pr-2.5 flex items-center text-slate-400 hover:text-[#FF0000]">
+                        <i class="fa-solid fa-circle-xmark text-xs"></i>
+                    </button>
+
+                    <!-- Dropdown Saran Fitur & Konten (Desktop) -->
+                    <div id="search-suggestions-desktop" class="hidden absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden z-50"></div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Toolbar Admin -->
+        <div id="admin-toolbar" class="hidden bg-slate-900 text-white px-3.5 sm:px-6 lg:px-8 py-3 border-b border-slate-800 flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3">
+            <div class="flex items-center justify-between sm:justify-start gap-2.5 text-xs">
+                <span class="px-2 py-0.5 bg-[#FF0000] text-white rounded font-bold uppercase tracking-wider text-[10px]">Mode Admin</span>
+                <span id="admin-cloud-badge" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white/10 text-amber-300 font-medium text-[11px]">
+                    <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> Mode Lokal
+                </span>
+            </div>
+
+            <div class="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2">
+                <button onclick="openPosterFormModal()" class="inline-flex items-center justify-center gap-1.5 bg-[#FF0000] hover:bg-[#D40000] text-white text-xs font-semibold px-3 py-2 rounded-lg shadow transition active:scale-95">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>Tambah Poster</span>
+                </button>
+                <button onclick="openVideoFormModal()" class="inline-flex items-center justify-center gap-1.5 bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold px-3 py-2 rounded-lg shadow transition active:scale-95">
+                    <i class="fa-solid fa-video"></i>
+                    <span>Tambah Video</span>
+                </button>
+                <button onclick="fetchAllCloudData(true)" class="inline-flex items-center justify-center gap-1.5 bg-white/10 hover:bg-white/20 text-white text-xs font-medium px-3 py-2 rounded-lg transition">
+                    <i class="fa-solid fa-arrows-rotate text-sky-400"></i>
+                    <span>Refresh Cloud</span>
+                </button>
+                <button onclick="openDataSyncModal()" class="inline-flex items-center justify-center gap-1.5 bg-white/10 hover:bg-white/20 text-white text-xs font-medium px-3 py-2 rounded-lg transition">
+                    <i class="fa-solid fa-database text-amber-400"></i>
+                    <span>Backup & Sandi</span>
+                </button>
+                <button onclick="logoutAdmin()" class="col-span-2 sm:col-span-1 inline-flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3 py-2 rounded-lg transition">
+                    <i class="fa-solid fa-eye"></i>
+                    <span>Pratinjau Publik</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Workspace Utama -->
+        <main class="flex-grow p-3.5 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto space-y-4 sm:space-y-6">
+            
+            <!-- Smart Search Mobile -->
+            <div id="search-wrapper-mobile" class="sm:hidden relative">
+                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                    <i class="fa-solid fa-magnifying-glass text-sm"></i>
+                </div>
+                <input type="text" id="search-input-mobile" autocomplete="off" placeholder="Cari fitur, lomba, video, CP..." 
+                    class="w-full pl-10 pr-10 py-2.5 bg-white border border-slate-200 rounded-xl text-base text-slate-800 placeholder-slate-400 shadow-2xs focus:outline-none focus:ring-2 focus:ring-[#FF0000]/20 focus:border-[#FF0000]">
+                <button type="button" id="clear-search-mobile" onclick="clearSearchInput()" aria-label="Hapus Pencarian" class="hidden absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-[#FF0000]">
+                    <i class="fa-solid fa-circle-xmark text-base"></i>
+                </button>
+
+                <!-- Dropdown Saran Fitur & Konten (Mobile) -->
+                <div id="search-suggestions-mobile" class="hidden absolute left-0 right-0 mt-1.5 bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden z-50"></div>
+            </div>
+
+            <!-- =================================================================
+                 TAMPILAN 1: DASHBOARD POSTER & INFORMASI (DEFAULT)
+            ================================================================== -->
+            <div id="poster-view-container" class="space-y-4 sm:space-y-6">
+                <!-- Kartu Statistik Cepat -->
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
+                    <div onclick="selectCategoryFromCard('Semua')" class="bg-white p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-slate-200 shadow-xs hover:border-[#FF0000] active:scale-[0.98] transition cursor-pointer flex items-center gap-2.5 sm:gap-3.5">
+                        <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl bg-red-50 text-[#FF0000] flex items-center justify-center text-base sm:text-lg shrink-0">
+                            <i class="fa-solid fa-layer-group"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <p class="text-[11px] sm:text-xs text-slate-500 font-medium leading-tight truncate">Total Info</p>
+                            <p id="stat-total" class="text-lg sm:text-xl font-extrabold text-slate-900 mt-0.5">0</p>
+                        </div>
+                    </div>
+
+                    <div onclick="selectCategoryFromCard('Seminar/Workshop')" class="bg-white p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-slate-200 shadow-xs hover:border-sky-500 active:scale-[0.98] transition cursor-pointer flex items-center gap-2.5 sm:gap-3.5">
+                        <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center text-base sm:text-lg shrink-0">
+                            <i class="fa-solid fa-chalkboard-user"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <p class="text-[11px] sm:text-xs text-slate-500 font-medium leading-tight truncate">Seminar</p>
+                            <p id="stat-seminar" class="text-lg sm:text-xl font-extrabold text-slate-900 mt-0.5">0</p>
+                        </div>
+                    </div>
+
+                    <div onclick="selectCategoryFromCard('Lomba')" class="bg-white p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-slate-200 shadow-xs hover:border-amber-500 active:scale-[0.98] transition cursor-pointer flex items-center gap-2.5 sm:gap-3.5">
+                        <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-base sm:text-lg shrink-0">
+                            <i class="fa-solid fa-trophy"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <p class="text-[11px] sm:text-xs text-slate-500 font-medium leading-tight truncate">Lomba</p>
+                            <p id="stat-lomba" class="text-lg sm:text-xl font-extrabold text-slate-900 mt-0.5">0</p>
+                        </div>
+                    </div>
+
+                    <div onclick="selectCategoryFromCard('Lowongan/Magang')" class="bg-white p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-slate-200 shadow-xs hover:border-emerald-500 active:scale-[0.98] transition cursor-pointer flex items-center gap-2.5 sm:gap-3.5">
+                        <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-base sm:text-lg shrink-0">
+                            <i class="fa-solid fa-briefcase"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <p class="text-[11px] sm:text-xs text-slate-500 font-medium leading-tight truncate">KP & Magang</p>
+                            <p id="stat-magang" class="text-lg sm:text-xl font-extrabold text-slate-900 mt-0.5">0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Galeri Poster -->
+                <section class="bg-white rounded-2xl border border-slate-200 shadow-xs p-3.5 sm:p-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 sm:pb-4 mb-4 sm:mb-6 border-b border-slate-100">
+                        <div>
+                            <h2 id="section-active-title" class="text-sm sm:text-lg font-bold text-slate-900">Semua Informasi Aktif</h2>
+                            <p class="text-[11px] sm:text-xs text-slate-500 mt-0.5">
+                                Menampilkan <span id="poster-count" class="font-bold text-[#FF0000]">0</span> poster • Ketuk poster untuk detail
+                            </p>
+                        </div>
+
+                        <!-- Pil Kategori Mobile -->
+                        <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 lg:hidden" id="mobile-category-pills">
+                            <button data-category="Semua" class="mobile-pill px-3.5 py-2 rounded-xl text-xs font-semibold bg-[#FF0000] text-white whitespace-nowrap shrink-0">Semua</button>
+                            <button data-category="Seminar/Workshop" class="mobile-pill px-3.5 py-2 rounded-xl text-xs font-medium bg-slate-100 text-slate-700 whitespace-nowrap shrink-0">Seminar</button>
+                            <button data-category="Lomba" class="mobile-pill px-3.5 py-2 rounded-xl text-xs font-medium bg-slate-100 text-slate-700 whitespace-nowrap shrink-0">Lomba</button>
+                            <button data-category="Lowongan/Magang" class="mobile-pill px-3.5 py-2 rounded-xl text-xs font-medium bg-slate-100 text-slate-700 whitespace-nowrap shrink-0">Magang</button>
+                            <button data-category="Pengumuman" class="mobile-pill px-3.5 py-2 rounded-xl text-xs font-medium bg-slate-100 text-slate-700 whitespace-nowrap shrink-0">Info HIMA</button>
+                            <button onclick="switchToVideoView()" class="px-3.5 py-2 rounded-xl text-xs font-semibold bg-red-50 text-[#FF0000] border border-red-200 whitespace-nowrap shrink-0 flex items-center gap-1.5">
+                                <i class="fa-solid fa-circle-play"></i> Video Edukasi
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Banner Hasil Pencarian Lintas Tab (Video) -->
+                    <div id="cross-search-banner-poster" class="hidden mb-4 sm:mb-5 p-3 sm:p-3.5 rounded-xl bg-red-50 border border-red-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                        <div class="flex items-center gap-2.5 text-xs text-slate-700">
+                            <i class="fa-solid fa-circle-play text-[#FF0000] text-base shrink-0"></i>
+                            <span id="cross-search-text-poster">Ditemukan video edukasi yang cocok dengan pencarianmu.</span>
+                        </div>
+                        <button type="button" onclick="switchToVideoView(false)" class="w-full sm:w-auto px-3.5 py-2 rounded-lg bg-[#FF0000] hover:bg-[#D40000] text-white text-xs font-semibold text-center shrink-0 transition">
+                            Lihat Video →
+                        </button>
+                    </div>
+
+                    <!-- Grid Poster -->
+                    <div id="poster-grid" class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-5"></div>
+
+                    <!-- State Kosong -->
+                    <div id="empty-state" class="hidden text-center py-10 sm:py-14 px-4 bg-etholBg rounded-2xl border border-dashed border-slate-300">
+                        <div class="w-12 h-12 sm:w-14 sm:h-14 bg-white text-[#FF0000] rounded-2xl flex items-center justify-center mx-auto mb-3 text-lg sm:text-xl shadow-xs border border-slate-200">
+                            <i class="fa-regular fa-folder-open"></i>
+                        </div>
+                        <h3 class="text-sm sm:text-base font-bold text-slate-900 mb-1">Tidak ada poster ditemukan</h3>
+                        <p class="text-xs text-slate-500 max-w-md mx-auto mb-4 sm:mb-5">Coba ubah kata kunci atau pilih kategori lain.</p>
+                        <button onclick="resetFilters()" class="px-4 py-2.5 bg-[#FF0000] text-white font-semibold text-xs rounded-xl hover:bg-[#D40000] transition">
+                            Tampilkan Semua Poster
+                        </button>
+                    </div>
+                </section>
+            </div>
+
+            <!-- =================================================================
+                 TAMPILAN 2: MENU TAB VIDEO EDUKASI & FUNFACT JURUSAN
+            ================================================================== -->
+            <div id="video-view-container" class="hidden space-y-4 sm:space-y-6">
+                <!-- Banner Header Video Edukasi -->
+                <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-red-950 rounded-2xl p-4 sm:p-6 text-white shadow-sm relative overflow-hidden flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div class="relative z-10 max-w-2xl">
+                        <span class="inline-flex items-center gap-2 px-4 sm:px-5 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-bold tracking-wide bg-[#FF0000] text-white mb-2.5 shadow-xs">
+                            <i class="fa-solid fa-play text-[10px] sm:text-xs"></i>
+                            <span>ELIN LEARNING HUB</span>
+                        </span>
+                        
+                    </div>
+                    <div class="relative z-10 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 shrink-0">
+                        <button id="btn-add-video-inline" onclick="openVideoFormModal()" class="hidden inline-flex items-center justify-center gap-2 bg-[#FF0000] hover:bg-[#D40000] text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-md transition">
+                            <i class="fa-solid fa-plus"></i> Upload / Tambah Video
+                        </button>
+                        <button onclick="setActiveCategory('Semua')" class="inline-flex items-center justify-center gap-1.5 bg-white/10 hover:bg-white/20 text-white text-xs font-semibold px-3.5 py-2.5 rounded-xl transition">
+                            <i class="fa-solid fa-arrow-left"></i> Kembali ke Poster
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Galeri Video -->
+                <section class="bg-white rounded-2xl border border-slate-200 shadow-xs p-3.5 sm:p-6">
+                    <!-- Baris Header & Filter Kriteria Tunggal (Extend Dropdown) -->
+                    <div class="flex items-center justify-between gap-3 pb-3.5 sm:pb-4 mb-4 sm:mb-6 border-b border-slate-100">
+                        <div class="min-w-0">
+                            <h3 class="text-sm sm:text-lg font-bold text-slate-900">Daftar Video Tersedia</h3>
+                            <p class="text-[11px] sm:text-xs text-slate-500 mt-0.5">
+                                Menampilkan <span id="video-count" class="font-bold text-[#FF0000]">0</span> video • Ketuk video untuk memutar
+                            </p>
+                        </div>
+
+                        <!-- Filter Topik Video (Single Expandable Tab) -->
+                        <div class="relative shrink-0" id="video-topic-dropdown">
+                            <button type="button" id="video-topic-toggle-btn" onclick="toggleVideoTopicMenu()"
+                                class="inline-flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-full text-xs font-semibold bg-[#FF0000] hover:bg-[#D40000] text-white shadow-xs transition active:scale-95">
+                                <i class="fa-solid fa-filter text-[11px]"></i>
+                                <span id="active-video-topic-label">Semua Topik</span>
+                                <i id="video-topic-chevron" class="fa-solid fa-chevron-down text-[10px] transition-transform duration-200"></i>
+                            </button>
+
+                            <!-- Panel Kriteria yang Extend saat Diklik -->
+                            <div id="video-topic-menu"
+                                class="hidden absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-slate-200 p-1.5 z-30">
+                                <p class="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">Pilih Kriteria</p>
+                                <button type="button" data-topic="Semua" onclick="setVideoTopicFilter('Semua')"
+                                    class="video-topic-option w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold bg-red-50 text-[#FF0000] transition">
+                                    <span>Semua Topik</span>
+                                    <i class="fa-solid fa-check text-[10px]"></i>
+                                </button>
+                                <button type="button" data-topic="Mata Kuliah" onclick="setVideoTopicFilter('Mata Kuliah')"
+                                    class="video-topic-option w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium text-slate-700 hover:bg-slate-100 transition mt-0.5">
+                                    <span>Mata Kuliah</span>
+                                    <i class="fa-solid fa-check text-[10px] hidden"></i>
+                                </button>
+                                <button type="button" data-topic="Pelatihan" onclick="setVideoTopicFilter('Pelatihan')"
+                                    class="video-topic-option w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium text-slate-700 hover:bg-slate-100 transition mt-0.5">
+                                    <span>Pelatihan</span>
+                                    <i class="fa-solid fa-check text-[10px] hidden"></i>
+                                </button>
+                               
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Banner Hasil Pencarian Lintas Tab (Poster) -->
+                    <div id="cross-search-banner-video" class="hidden mb-4 sm:mb-5 p-3 sm:p-3.5 rounded-xl bg-slate-100 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                        <div class="flex items-center gap-2.5 text-xs text-slate-700">
+                            <i class="fa-solid fa-table-columns text-[#FF0000] text-base shrink-0"></i>
+                            <span id="cross-search-text-video">Ditemukan poster informasi yang cocok dengan pencarianmu.</span>
+                        </div>
+                        <button type="button" onclick="setActiveCategory('Semua', false)" class="w-full sm:w-auto px-3.5 py-2 rounded-lg bg-slate-900 hover:bg-[#FF0000] text-white text-xs font-semibold text-center shrink-0 transition">
+                            Lihat Poster →
+                        </button>
+                    </div>
+
+                    <!-- Grid Kartu Video -->
+                    <div id="video-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5"></div>
+
+                    <!-- State Kosong Video -->
+                    <div id="video-empty-state" class="hidden text-center py-10 sm:py-14 px-4 bg-etholBg rounded-2xl border border-dashed border-slate-300">
+                        <div class="w-12 h-12 sm:w-14 sm:h-14 bg-white text-[#FF0000] rounded-2xl flex items-center justify-center mx-auto mb-3 text-lg sm:text-xl shadow-xs border border-slate-200">
+                            <i class="fa-solid fa-film"></i>
+                        </div>
+                        <h3 class="text-sm sm:text-base font-bold text-slate-900 mb-1">Belum ada video pada kategori ini</h3>
+                        <p class="text-xs text-slate-500 max-w-md mx-auto mb-4 sm:mb-5">Video edukasi mata kuliah, pelatihan, maupun funfact jurusan akan tampil di sini.</p>
+                        <button onclick="resetVideoFilters()" class="px-4 py-2.5 bg-[#FF0000] text-white font-semibold text-xs rounded-xl hover:bg-[#D40000] transition">
+                            Tampilkan Semua Video
+                        </button>
+                    </div>
+                </section>
+            </div>
+
+        </main>
+
+        <footer class="bg-white border-t border-slate-200 px-4 sm:px-6 lg:px-8 py-4 text-center sm:text-left text-[11px] sm:text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-1.5">
+            <p>© 2026 <span class="font-semibold text-slate-800">Departemen RISTEK — HIMA ELIN PENS</span>. All rights reserved.</p>
+            <p class="text-[10px] sm:text-[11px] text-slate-400">Politeknik Elektronika Negeri Surabaya</p>
+        </footer>
+    </div>
+
+    <!-- =====================================================================
+         MODAL 1: DETAIL POSTER
+    ====================================================================== -->
+    <div id="detail-modal" class="fixed inset-0 z-50 hidden overflow-y-auto" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 bg-slate-950/75 backdrop-blur-xs transition-opacity" onclick="closeDetailModal()"></div>
+        <div class="flex min-h-full items-center justify-center p-3 sm:p-6">
+            <div class="modal-animate relative w-full max-w-4xl bg-white rounded-2xl shadow-2xl overflow-hidden border border-slate-200 flex flex-col md:flex-row">
+                
+                <button onclick="closeDetailModal()" aria-label="Tutup Detail" class="absolute top-3 right-3 sm:top-4 sm:right-4 z-10 w-9 h-9 rounded-full bg-white/95 hover:bg-[#FF0000] text-slate-800 hover:text-white flex items-center justify-center shadow-md border border-slate-200/60 transition">
+                    <i class="fa-solid fa-xmark text-base sm:text-lg"></i>
+                </button>
+
+                <div class="w-full md:w-1/2 bg-slate-900 flex items-center justify-center p-3.5 sm:p-6 relative">
+                    <img id="modal-poster-img" src="" alt="Poster Detail" class="max-h-[45vh] md:max-h-[70vh] w-auto object-contain rounded-xl shadow-lg">
+                </div>
+
+                <div class="w-full md:w-1/2 p-4 sm:p-6 md:p-8 flex flex-col justify-between md:max-h-[85vh] md:overflow-y-auto bg-white">
+                    <div>
+                        <div class="flex flex-wrap items-center gap-2 mb-2.5 sm:mb-3 pr-8 md:pr-0">
+                            <span id="modal-poster-category" class="px-2.5 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-semibold bg-red-50 text-[#FF0000] border border-red-200">Kategori</span>
+                            <span id="modal-poster-date" class="text-[11px] sm:text-xs text-slate-500 flex items-center gap-1"><i class="fa-regular fa-calendar"></i> Tanggal</span>
+                        </div>
+
+                        <h2 id="modal-poster-title" class="text-lg sm:text-2xl font-bold text-slate-900 leading-snug mb-3 sm:mb-4">Judul</h2>
+
+                        <div class="space-y-1.5 sm:space-y-2 mb-5 sm:mb-6">
+                            <h4 class="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-[#FF0000]">Deskripsi Informasi</h4>
+                            <p id="modal-poster-desc" class="text-xs sm:text-sm text-slate-700 leading-relaxed whitespace-pre-line">Deskripsi...</p>
+                        </div>
+
+                        <div class="bg-etholBg rounded-xl p-3.5 sm:p-4 border border-slate-200 mb-5 sm:mb-6">
+                            <div class="flex items-center gap-3">
+                                <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#FF0000]/10 text-[#FF0000] flex items-center justify-center shrink-0 border border-[#FF0000]/20">
+                                    <i class="fa-solid fa-user-tie text-sm"></i>
+                                </div>
+                                <div class="overflow-hidden">
+                                    <p class="text-[11px] sm:text-xs text-slate-500">Narahubung / Contact Person</p>
+                                    <p id="modal-poster-cp" class="text-xs sm:text-sm font-bold text-slate-900 truncate">-</p>
+                                    <p id="modal-poster-phone-display" class="text-xs text-[#FF0000] font-mono font-semibold mt-0.5">-</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2.5 sm:space-y-3 pt-3.5 sm:pt-4 border-t border-slate-100">
+                        <a id="modal-btn-wa" href="#" target="_blank" rel="noopener noreferrer" 
+                           class="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs sm:text-sm py-3 px-4 rounded-xl shadow-md transition">
+                            <i class="fa-brands fa-whatsapp text-base sm:text-lg"></i>
+                            <span>Hubungi Kontak (WhatsApp)</span>
+                        </a>
+
+                        <a id="modal-btn-link" href="#" target="_blank" rel="noopener noreferrer" 
+                           class="w-full flex items-center justify-center gap-2 bg-[#FF0000] hover:bg-[#D40000] text-white font-semibold text-xs sm:text-sm py-3 px-4 rounded-xl shadow-md transition">
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                            <span>Kunjungi Tautan Informasi</span>
+                        </a>
+
+                        <div id="modal-admin-actions" class="hidden pt-3 mt-2 border-t border-dashed border-slate-200 flex items-center justify-between gap-2">
+                            <button id="modal-btn-edit" type="button" class="flex-1 py-2.5 px-3 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 text-xs font-semibold inline-flex items-center justify-center gap-1.5 transition">
+                                <i class="fa-solid fa-pen-to-square"></i> Edit Poster
+                            </button>
+                            <button id="modal-btn-delete" type="button" class="flex-1 py-2.5 px-3 rounded-lg bg-red-50 hover:bg-red-100 text-red-700 border border-red-300 text-xs font-semibold inline-flex items-center justify-center gap-1.5 transition">
+                                <i class="fa-regular fa-trash-can"></i> Hapus Poster
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =====================================================================
+         MODAL 2: LOGIN ADMIN (SUPABASE AUTHENTICATION)
+    ====================================================================== -->
+    <div id="login-modal" class="fixed inset-0 z-50 hidden overflow-y-auto" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 bg-slate-950/75 backdrop-blur-sm transition-opacity" onclick="closeLoginModal()"></div>
+        <div class="flex min-h-full items-center justify-center p-3.5 sm:p-4">
+            <div class="modal-animate relative w-full max-w-md bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
+                <div class="p-5 sm:p-8">
+                    <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-[#FF0000] text-white flex items-center justify-center text-lg sm:text-xl mb-3.5 sm:mb-4 shadow-md">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <h3 class="text-lg sm:text-xl font-bold text-slate-900">Login Admin RISTEK</h3>
+                    <p class="text-xs sm:text-sm text-slate-600 mt-1">Masukkan email dan kata sandi pengurus HIMA ELIN PENS.</p>
+
+                    <form id="login-form" class="mt-4 sm:mt-5 space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Email Admin</label>
+                            <input type="email" id="admin-email-input" required placeholder="ristek.elin@pens.ac.id"
+                                class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-base sm:text-sm focus:outline-none focus:border-[#FF0000]">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Kata Sandi Admin</label>
+                            <div class="relative">
+                                <input type="password" id="admin-password-input" required placeholder="Masukkan kata sandi..."
+                                    class="w-full pl-3.5 pr-10 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-base sm:text-sm focus:outline-none focus:border-[#FF0000]">
+                                <button type="button" onclick="togglePasswordVisibility()" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-700">
+                                    <i id="eye-icon" class="fa-regular fa-eye text-sm"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-end gap-2.5 pt-2">
+                            <button type="button" onclick="closeLoginModal()" class="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-medium text-slate-600 hover:bg-slate-100 transition">Batal</button>
+                            <button type="submit" id="btn-login-submit" class="px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-[#FF0000] hover:bg-[#D40000] text-white shadow-md transition">Masuk</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =====================================================================
+         MODAL 3: TAMBAH / EDIT POSTER
+    ====================================================================== -->
+    <div id="poster-form-modal" class="fixed inset-0 z-50 hidden overflow-y-auto" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 bg-slate-950/75 backdrop-blur-sm transition-opacity" onclick="closePosterFormModal()"></div>
+        <div class="flex min-h-full items-center justify-center p-3 sm:p-6">
+            <div class="modal-animate relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
+                <div class="px-4 sm:px-6 py-3.5 sm:py-4 bg-etholBg border-b border-slate-200 flex items-center justify-between">
+                    <h3 id="form-modal-title" class="text-sm sm:text-base font-bold text-slate-900">Tambah Poster Baru</h3>
+                    <button onclick="closePosterFormModal()" class="w-8 h-8 rounded-lg hover:bg-slate-200 text-slate-500 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+
+                <form id="poster-form" class="p-4 sm:p-6 space-y-4 max-h-[82dvh] overflow-y-auto">
+                    <input type="hidden" id="edit-poster-id" value="">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1.5">Judul Poster *</label>
+                        <input type="text" id="input-title" required placeholder="Contoh: Pelatihan PLC..."
+                            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-base sm:text-sm focus:outline-none focus:border-[#FF0000]">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1.5">Kategori *</label>
+                        <select id="input-category" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-base sm:text-sm focus:outline-none focus:border-[#FF0000]">
+                            <option value="Seminar/Workshop">Seminar & Pelatihan</option>
+                            <option value="Lomba">Lomba & Kompetisi</option>
+                            <option value="Lowongan/Magang">KP, Magang & Karir</option>
+                            <option value="Pengumuman">Info HIMA & Akademik</option>
+                        </select>
+                    </div>
+
+                    <div class="bg-etholBg p-3.5 sm:p-4 rounded-xl border border-slate-200 space-y-3">
+                        <label class="block text-xs font-bold text-slate-800">Gambar Poster (Upload File / URL) *</label>
+                        <div class="relative border-2 border-dashed border-slate-300 hover:border-[#FF0000] bg-white rounded-xl p-4 text-center transition cursor-pointer">
+                            <input type="file" id="input-image-file" accept="image/*" onchange="handleImageFileUpload(event)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                            <div class="text-slate-600 space-y-1">
+                                <i class="fa-solid fa-cloud-arrow-up text-2xl text-[#FF0000]"></i>
+                                <p class="text-xs font-semibold text-slate-800">Ketuk untuk pilih file poster</p>
+                            </div>
+                        </div>
+                        <div id="compression-stats" class="hidden p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 flex items-center justify-between">
+                            <p id="compression-detail" class="font-semibold">Kompresi Berhasil</p>
+                            <img id="compression-preview-thumb" src="" alt="Preview" class="w-10 h-12 object-cover rounded border">
+                        </div>
+                        <input type="text" id="input-image" required placeholder="https://..." class="w-full px-3 py-2.5 bg-white border border-slate-300 rounded-lg text-base sm:text-xs font-mono">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1.5">Deskripsi Lengkap *</label>
+                        <textarea id="input-desc" rows="3" required placeholder="Detail kegiatan..." class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-base sm:text-sm focus:outline-none focus:border-[#FF0000]"></textarea>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Nama CP *</label>
+                            <input type="text" id="input-cp" required placeholder="Contoh: Mas Dimas" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-base sm:text-sm focus:outline-none focus:border-[#FF0000]">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Nomor WhatsApp *</label>
+                            <input type="tel" id="input-wa" required placeholder="0812..." class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-base sm:text-sm focus:outline-none focus:border-[#FF0000]">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1.5">Link Pendaftaran *</label>
+                        <input type="text" id="input-link" required placeholder="https://..." class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-base sm:text-sm focus:outline-none focus:border-[#FF0000]">
+                    </div>
+
+                    <div class="pt-3 border-t border-slate-200 flex items-center justify-end gap-2.5 sm:gap-3">
+                        <button type="button" onclick="closePosterFormModal()" class="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-medium text-slate-600 hover:bg-slate-100 transition">Batal</button>
+                        <button type="submit" id="btn-submit-poster" class="px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-[#FF0000] hover:bg-[#D40000] text-white shadow-md transition">Simpan & Publikasikan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- =====================================================================
+         MODAL 4: BACKUP & PASSWORD (SINKRON CLOUD)
+    ====================================================================== -->
+    <div id="sync-modal" class="fixed inset-0 z-50 hidden overflow-y-auto" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 bg-slate-950/75 backdrop-blur-sm transition-opacity" onclick="closeDataSyncModal()"></div>
+        <div class="flex min-h-full items-center justify-center p-3.5 sm:p-4">
+            <div class="modal-animate relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
+                <div class="px-4 sm:px-6 py-3.5 sm:py-4 bg-etholBg border-b border-slate-200 flex items-center justify-between">
+                    <h3 class="text-sm sm:text-base font-bold text-slate-900">Cadangan Data & Keamanan Admin</h3>
+                    <button onclick="closeDataSyncModal()" class="w-8 h-8 rounded-lg hover:bg-slate-200 text-slate-500 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <div class="p-4 sm:p-6 space-y-5 sm:space-y-6">
+                    <div class="space-y-2">
+                        <h4 class="text-xs font-bold uppercase text-[#FF0000]">Cadangan Data JSON (Poster & Video)</h4>
+                        <div class="flex flex-wrap gap-2.5 pt-1">
+                            <button type="button" onclick="exportDataJSON()" class="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold">Ekspor JSON</button>
+                            <label class="px-4 py-2.5 rounded-xl bg-red-50 hover:bg-red-100 text-red-800 border border-red-200 text-xs font-semibold cursor-pointer">
+                                Impor JSON
+                                <input type="file" accept=".json" onchange="importDataJSON(event)" class="hidden">
+                            </label>
+                        </div>
+                    </div>
+
+                    <hr class="border-slate-200">
+
+                    <form id="change-password-form" class="space-y-3">
+                        <div>
+                            <h4 class="text-xs font-bold uppercase text-[#FF0000]">Ubah Kata Sandi Admin</h4>
+                            <p class="text-[11px] text-slate-500 mt-0.5">Perubahan otomatis tersinkron ke seluruh perangkat yang login dengan akun ini.</p>
+                        </div>
+                        <div class="flex flex-col sm:flex-row gap-2.5">
+                            <input type="password" id="new-admin-password" minlength="6" required placeholder="Password baru (min. 6 karakter)"
+                                class="flex-grow px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-base sm:text-xs">
+                            <button type="submit" id="btn-save-password" class="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-[#FF0000] text-white text-xs font-semibold shrink-0 transition">Simpan Password</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =====================================================================
+         MODAL 5: PEMUTAR VIDEO EDUKASI
+    ====================================================================== -->
+    <div id="video-player-modal" class="fixed inset-0 z-50 hidden overflow-y-auto" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm transition-opacity" onclick="closeVideoPlayerModal()"></div>
+        <div class="flex min-h-full items-center justify-center p-2.5 sm:p-6">
+            <div class="modal-animate relative w-full max-w-4xl bg-white rounded-2xl shadow-2xl overflow-hidden border border-slate-200">
+                <div class="px-4 sm:px-5 py-3 sm:py-3.5 bg-slate-900 text-white flex items-center justify-between gap-2.5">
+                    <div class="flex items-center gap-2 min-w-0">
+                        <span id="player-video-topic" class="px-2 py-0.5 rounded bg-[#FF0000] text-[10px] font-bold uppercase shrink-0">Topik</span>
+                        <h3 id="player-video-title" class="text-xs sm:text-base font-bold truncate">Judul Video</h3>
+                    </div>
+                    <button onclick="closeVideoPlayerModal()" aria-label="Tutup Video" class="w-8 h-8 rounded-lg bg-white/10 hover:bg-[#FF0000] text-white flex items-center justify-center shrink-0 transition">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                <!-- Container Video Player (16:9) -->
+                <div class="relative w-full aspect-video bg-black">
+                    <iframe id="player-iframe" class="hidden w-full h-full" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                    <video id="player-native-video" class="hidden w-full h-full" controls playsinline></video>
+                </div>
+
+                <!-- Detail & Deskripsi Video -->
+                <div class="p-4 sm:p-6 bg-white space-y-2.5 sm:space-y-3">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-[11px] sm:text-xs text-slate-500">
+                        <span class="font-semibold text-slate-800"><i class="fa-solid fa-chalkboard-user text-[#FF0000] mr-1"></i> Pemateri / Kreator: <span id="player-video-speaker">-</span></span>
+                        <span id="player-video-date"><i class="fa-regular fa-calendar mr-1"></i> -</span>
+                    </div>
+                    <p id="player-video-desc" class="text-xs sm:text-sm text-slate-700 leading-relaxed whitespace-pre-line">Deskripsi video...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =====================================================================
+         MODAL 6: TAMBAH / EDIT VIDEO EDUKASI (ADMIN)
+    ====================================================================== -->
+    <div id="video-form-modal" class="fixed inset-0 z-50 hidden overflow-y-auto" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 bg-slate-950/75 backdrop-blur-sm transition-opacity" onclick="closeVideoFormModal()"></div>
+        <div class="flex min-h-full items-center justify-center p-3 sm:p-6">
+            <div class="modal-animate relative w-full max-w-xl bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
+                <div class="px-4 sm:px-6 py-3.5 sm:py-4 bg-etholBg border-b border-slate-200 flex items-center justify-between">
+                    <h3 id="video-form-modal-title" class="text-sm sm:text-base font-bold text-slate-900">Tambah Video Edukasi Baru</h3>
+                    <button onclick="closeVideoFormModal()" class="w-8 h-8 rounded-lg hover:bg-slate-200 text-slate-500 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+
+                <form id="video-form" class="p-4 sm:p-6 space-y-4 max-h-[82dvh] overflow-y-auto">
+                    <input type="hidden" id="edit-video-id" value="">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1.5">Judul Video *</label>
+                        <input type="text" id="vid-input-title" required placeholder="Contoh: Rangkaian Op-Amp Dasar / Funfact PLN..."
+                            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-base sm:text-sm focus:outline-none focus:border-[#FF0000]">
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Kategori Video *</label>
+                            <select id="vid-input-topic" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-base sm:text-sm focus:outline-none focus:border-[#FF0000]">
+                                <option value="Mata Kuliah">Mata Kuliah</option>
+                                <option value="Pelatihan">Pelatihan</option>
+                               
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Pemateri / Kreator *</label>
+                            <input type="text" id="vid-input-speaker" required placeholder="Contoh: Dep. RISTEK / Rayhan"
+                                class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-base sm:text-sm focus:outline-none focus:border-[#FF0000]">
+                        </div>
+                    </div>
+
+                    <div class="bg-etholBg p-3.5 sm:p-4 rounded-xl border border-slate-200 space-y-3">
+                        <label class="block text-xs font-bold text-slate-800">Sumber Video (Tautan YouTube/Drive/MP4 atau File Singkat) *</label>
+                        
+                        <div class="relative border-2 border-dashed border-slate-300 hover:border-[#FF0000] bg-white rounded-xl p-3 text-center transition cursor-pointer">
+                            <input type="file" id="vid-input-file" accept="video/mp4,video/webm" onchange="handleLocalVideoFileUpload(event)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                            <div class="text-slate-600">
+                                <p class="text-xs font-semibold text-slate-800"><i class="fa-solid fa-film text-[#FF0000] mr-1"></i> Ketuk untuk pilih file MP4 lokal (Maks. 5 MB)</p>
+                                <p class="text-[10px] text-slate-400 mt-0.5">Untuk video berdurasi panjang, upload ke YouTube / Google Drive lalu tempel link di bawah</p>
+                            </div>
+                        </div>
+
+                        <div id="vid-file-status" class="hidden p-2.5 rounded-lg bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 font-semibold">
+                            Video lokal siap dipublikasikan!
+                        </div>
+
+                        <input type="text" id="vid-input-url" required placeholder="https://www.youtube.com/watch?v=... atau https://youtu.be/..."
+                            class="w-full px-3 py-2.5 bg-white border border-slate-300 rounded-lg text-base sm:text-xs font-mono focus:outline-none focus:border-[#FF0000]">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1.5">Thumbnail Video (Opsional — Otomatis dari YouTube jika kosong)</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="vid-input-thumb" placeholder="URL gambar thumbnail atau pilih file..."
+                                class="flex-1 px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-base sm:text-xs font-mono focus:outline-none focus:border-[#FF0000]">
+                            <label class="px-3.5 py-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-semibold cursor-pointer shrink-0 flex items-center gap-1">
+                                <i class="fa-solid fa-image"></i> Pilih
+                                <input type="file" accept="image/*" onchange="handleVideoThumbUpload(event)" class="hidden">
+                            </label>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1.5">Deskripsi / Ringkasan Materi *</label>
+                        <textarea id="vid-input-desc" rows="3" required placeholder="Jelaskan poin pembahasan video..."
+                            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-base sm:text-sm focus:outline-none focus:border-[#FF0000]"></textarea>
+                    </div>
+
+                    <div class="pt-3 border-t border-slate-200 flex items-center justify-end gap-2.5 sm:gap-3">
+                        <button type="button" onclick="closeVideoFormModal()" class="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-medium text-slate-600 hover:bg-slate-100 transition">Batal</button>
+                        <button type="submit" id="btn-submit-video" class="px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-[#FF0000] hover:bg-[#D40000] text-white shadow-md transition">Simpan & Publikasikan Video</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- =====================================================================
+         JAVASCRIPT SUPABASE AUTH + RLS CLOUD SYNC + SMART SEARCH + VIDEO EDUKASI
+    ====================================================================== -->
+    <script>
+        // =================================================================
+        // KONFIGURASI SUPABASE CLOUD
+        // =================================================================
+        const SUPABASE_CONFIG = {
+            URL: "https://fhqcszpsoxusmibrssvo.supabase.co",
+            ANON_KEY: "sb_publishable_9Ur3Y5O-RNnk8GCnUfgxmA_Z7LnmoYK",
+            TABLE: "posters",
+            VIDEO_TABLE: "videos"
+        };
+
+        const isCloudConfigured = () => {
+            return SUPABASE_CONFIG.URL.startsWith("https://") && 
+                   !SUPABASE_CONFIG.URL.includes("MASUKKAN_") &&
+                   SUPABASE_CONFIG.ANON_KEY.length > 10;
+        };
+
+        const defaultPosters = [
+            {
+                id: 1,
+                title: "Industrial Automation & PLC Training 2026 — HIMA ELIN PENS",
+                category: "Seminar/Workshop",
+                date: "18 Nov 2026",
+                image: "https://placehold.co/600x800/990000/ffffff?text=PLC+TRAINING+ELIN",
+                description: "Pelatihan intensif otomasi industri untuk mahasiswa Elektro Industri PENS.",
+                cpName: "Mas Dimas (Kadep Ristek)",
+                whatsapp: "6281234567890",
+                link: "https://pens.ac.id"
+            }
+        ];
+
+        const defaultVideos = [
+            {
+                id: 101,
+                title: "Pengenalan Dasar Sistem Tenaga & Proteksi Listrik Industri",
+                topic: "Mata Kuliah",
+                date: "20 Nov 2026",
+                videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+                thumbnail: "",
+                speaker: "Departemen RISTEK HIMA ELIN",
+                description: "Ringkasan materi pengantar proteksi sistem tenaga listrik, koordinasi MCB/MCCB, dan pembacaan Single Line Diagram untuk mahasiswa Teknik Elektro Industri."
+            },
+            {
+                id: 102,
+                title: "Funfact Teknik Elektro Industri: Kenapa Frekuensi Listrik Kita 50 Hz?",
+                topic: "Funfact Jurusan",
+                date: "21 Nov 2026",
+                videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+                thumbnail: "",
+                speaker: "Tim Media & RISTEK ELIN",
+                description: "Tahukah kamu sejarah di balik pemilihan frekuensi 50 Hz di Indonesia dibanding 60 Hz di Amerika? Simak penjelasan singkatnya!"
+            }
+        ];
+
+        const STORAGE_KEYS = {
+            POSTERS: "hima_elin_pens_posters_cache_v1",
+            VIDEOS: "hima_elin_pens_videos_cache_v1",
+            ADMIN_SESSION: "hima_elin_supabase_auth_session_v1"
+        };
+
+        let posters = [];
+        let videos = [];
+        let activeView = "posters";
+        let currentCategory = "Semua";
+        let currentVideoTopic = "Semua";
+        let searchQuery = "";
+        let isAdminLoggedIn = false;
+        let adminAuthSession = null;
+        let logoTapCount = 0;
+        let logoTapTimer = null;
+
+        // Direktori Fitur untuk Smart Search Suggestion
+        const FEATURE_DIRECTORY = [
+            {
+                title: "Video Edukasi & Funfact Jurusan",
+                subtitle: "Tonton materi mata kuliah, pelatihan & funfact ELIN",
+                icon: "fa-circle-play",
+                badge: "Menu Tab",
+                keywords: ["video", "vidio", "edukasi", "matkul", "mata kuliah", "funfact", "fun fact", "fakta", "tutorial", "belajar", "materi", "rekaman", "kuliah"],
+                action: () => { clearSearchInput(); switchToVideoView(); }
+            },
+            {
+                title: "Seminar & Pelatihan",
+                subtitle: "Buka kategori poster seminar, workshop & pelatihan",
+                icon: "fa-chalkboard-user",
+                badge: "Kategori",
+                keywords: ["seminar", "workshop", "pelatihan", "plc", "scada", "sertifikat", "webinar"],
+                action: () => { clearSearchInput(); setActiveCategory("Seminar/Workshop"); }
+            },
+            {
+                title: "Lomba & Kompetisi",
+                subtitle: "Buka kategori informasi lomba & kompetisi mahasiswa",
+                icon: "fa-trophy",
+                badge: "Kategori",
+                keywords: ["lomba", "kompetisi", "juara", "piala", "karya tulis", "robot", "inovasi", "kontes"],
+                action: () => { clearSearchInput(); setActiveCategory("Lomba"); }
+            },
+            {
+                title: "KP, Magang & Karir",
+                subtitle: "Buka kategori lowongan Kerja Praktik & magang industri",
+                icon: "fa-briefcase",
+                badge: "Kategori",
+                keywords: ["kp", "kerja praktik", "magang", "lowongan", "karir", "kerja", "industri", "perusahaan", "internship"],
+                action: () => { clearSearchInput(); setActiveCategory("Lowongan/Magang"); }
+            },
+            {
+                title: "Info HIMA & Akademik",
+                subtitle: "Buka pengumuman resmi HIMA ELIN & kampus PENS",
+                icon: "fa-bullhorn",
+                badge: "Kategori",
+                keywords: ["pengumuman", "info", "hima", "akademik", "jadwal", "beasiswa", "informasi"],
+                action: () => { clearSearchInput(); setActiveCategory("Pengumuman"); }
+            },
+            {
+                title: "Semua Informasi Poster",
+                subtitle: "Tampilkan seluruh papan poster digital aktif",
+                icon: "fa-table-columns",
+                badge: "Dashboard",
+                keywords: ["semua", "poster", "beranda", "home", "dashboard"],
+                action: () => { clearSearchInput(); setActiveCategory("Semua"); }
+            },
+            {
+                title: "Portal ETHOL PENS",
+                subtitle: "Buka e-learning resmi ETHOL PENS (ethol.pens.ac.id)",
+                icon: "fa-graduation-cap",
+                badge: "Tautan PENS",
+                keywords: ["ethol", "elearning", "e-learning", "tugas", "presensi"],
+                action: () => { clearSearchInput(); window.open("https://ethol.pens.ac.id", "_blank"); }
+            },
+            {
+                title: "Online MIS PENS",
+                subtitle: "Akses sistem informasi akademik mahasiswa PENS",
+                icon: "fa-server",
+                badge: "Tautan PENS",
+                keywords: ["mis", "online mis", "nilai", "frs", "krs", "ipk", "ukt"],
+                action: () => { clearSearchInput(); window.open("https://online.mis.pens.ac.id", "_blank"); }
+            },
+            {
+                title: "Website Prodi Teknik Elektro Industri",
+                subtitle: "Informasi resmi program studi ELIN PENS",
+                icon: "fa-microchip",
+                badge: "Tautan PENS",
+                keywords: ["prodi", "elin", "jurusan", "elektro industri", "dosen", "kurikulum"],
+                action: () => { clearSearchInput(); window.open("https://elin.pens.ac.id", "_blank"); }
+            },
+            {
+                title: "Website MIS PENS",
+                subtitle: "Informasi resmi MIS PENS",
+                icon: "fa-microchip",
+                badge: "Tautan PENS",
+                keywords: ["prodi", "mis", "jurusan", "pens", "dosen", "kurikulum"],
+                action: () => { clearSearchInput(); window.open("https://dapidmr.it.student.pens.ac.id/Mis%20PENS/main.html", "_blank"); }
+            },
+            {
+                title: "Panel Admin RISTEK",
+                subtitle: "Masuk mode pengelola untuk tambah poster & video",
+                icon: "fa-shield-halved",
+                badge: "Pengelola",
+                keywords: ["admin", "login", "kelola", "upload", "tambah poster", "tambah video", "ristek", "password"],
+                action: () => { clearSearchInput(); isAdminLoggedIn ? showToast("Mode Admin sudah aktif!", "info") : openLoginModal(); }
+            }
+        ];
+
+        document.addEventListener("DOMContentLoaded", async () => {
+            loadAdminState();
+            setupEventListeners();
+            updateCloudStatusBadges();
+
+            loadPostersFromLocalCache();
+            loadVideosFromLocalCache();
+            renderPosters();
+            renderVideos();
+
+            if (isCloudConfigured()) {
+                if (isAdminLoggedIn) {
+                    await refreshAdminToken();
+                }
+                await fetchAllCloudData(false);
+            }
+        });
+
+        function updateCloudStatusBadges() {
+            const pubBadge = document.getElementById("public-sync-indicator");
+            const admBadge = document.getElementById("admin-cloud-badge");
+
+            if (isCloudConfigured()) {
+                if (pubBadge) {
+                    pubBadge.innerHTML = `<span class="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-500 animate-pulse"></span><span>Online Cloud</span>`;
+                    pubBadge.className = "inline-flex items-center gap-1.5 px-2 sm:px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] sm:text-[11px] font-semibold";
+                }
+                if (admBadge) {
+                    admBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Auto-Save Cloud Aktif`;
+                    admBadge.className = "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-500/20 text-emerald-300 font-medium text-[11px]";
+                }
+            } else {
+                if (pubBadge) {
+                    pubBadge.innerHTML = `<span class="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-amber-500"></span><span>Mode Lokal</span>`;
+                }
+            }
+        }
+
+        // =================================================================
+        // SUPABASE AUTH & PROTECTED FETCH HELPER
+        // =================================================================
+        function getSupabaseHeaders(extra = {}, useAdminToken = false) {
+            const bearer = (useAdminToken && adminAuthSession?.access_token)
+                ? adminAuthSession.access_token
+                : SUPABASE_CONFIG.ANON_KEY;
+
+            return {
+                "Content-Type": "application/json",
+                "apikey": SUPABASE_CONFIG.ANON_KEY,
+                "Authorization": `Bearer ${bearer}`,
+                ...extra
+            };
+        }
+
+        async function loginWithSupabaseAuth(email, password) {
+            const endpoint = `${SUPABASE_CONFIG.URL}/auth/v1/token?grant_type=password`;
+            const response = await fetch(endpoint, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "apikey": SUPABASE_CONFIG.ANON_KEY
+                },
+                body: JSON.stringify({ email, password })
+            });
+
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.error_description || data.msg || "Email atau kata sandi salah.");
+            }
+
+            adminAuthSession = {
+                access_token: data.access_token,
+                refresh_token: data.refresh_token,
+                email: data.user?.email || email
+            };
+            isAdminLoggedIn = true;
+            sessionStorage.setItem(STORAGE_KEYS.ADMIN_SESSION, JSON.stringify(adminAuthSession));
+        }
+
+        async function refreshAdminToken() {
+            if (!adminAuthSession?.refresh_token || !isCloudConfigured()) return false;
+            try {
+                const endpoint = `${SUPABASE_CONFIG.URL}/auth/v1/token?grant_type=refresh_token`;
+                const response = await fetch(endpoint, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "apikey": SUPABASE_CONFIG.ANON_KEY
+                    },
+                    body: JSON.stringify({ refresh_token: adminAuthSession.refresh_token })
+                });
+
+                if (!response.ok) return false;
+                const data = await response.json();
+                if (data.access_token) {
+                    adminAuthSession = {
+                        access_token: data.access_token,
+                        refresh_token: data.refresh_token || adminAuthSession.refresh_token,
+                        email: data.user?.email || adminAuthSession.email
+                    };
+                    sessionStorage.setItem(STORAGE_KEYS.ADMIN_SESSION, JSON.stringify(adminAuthSession));
+                    return true;
+                }
+                return false;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        async function authorizedCloudRequest(url, options = {}) {
+            const firstResponse = await fetch(url, {
+                ...options,
+                headers: getSupabaseHeaders(options.headers || {}, true)
+            });
+
+            if (firstResponse.status === 401 || firstResponse.status === 403) {
+                const refreshed = await refreshAdminToken();
+                if (refreshed) {
+                    return await fetch(url, {
+                        ...options,
+                        headers: getSupabaseHeaders(options.headers || {}, true)
+                    });
+                } else {
+                    logoutAdmin(true);
+                }
+            }
+            return firstResponse;
+        }
+
+        async function updateSupabaseAdminPassword(newPassword) {
+            const endpoint = `${SUPABASE_CONFIG.URL}/auth/v1/user`;
+            const response = await authorizedCloudRequest(endpoint, {
+                method: "PUT",
+                body: JSON.stringify({ password: newPassword })
+            });
+
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.msg || data.message || "Gagal memperbarui kata sandi.");
+            }
+            return true;
+        }
+
+        // =================================================================
+        // OPERASI CLOUD DATA (POSTERS & VIDEOS)
+        // =================================================================
+        async function fetchAllCloudData(manualTrigger = false) {
+            await fetchPostersFromCloud(manualTrigger);
+            await fetchVideosFromCloud(false);
+        }
+
+        async function fetchPostersFromCloud(manualTrigger = false) {
+            if (!isCloudConfigured()) {
+                if (manualTrigger) showToast("URL/Key Supabase belum diisi.", "error");
+                return;
+            }
+            if (manualTrigger) showToast("Menyinkronkan data dari cloud...", "info");
+
+            try {
+                const endpoint = `${SUPABASE_CONFIG.URL}/rest/v1/${SUPABASE_CONFIG.TABLE}?select=*&order=id.desc`;
+                const response = await fetch(endpoint, { method: "GET", headers: getSupabaseHeaders() });
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const data = await response.json();
+
+                if (Array.isArray(data)) {
+                    posters = data.map(row => ({
+                        id: Number(row.id),
+                        title: row.title,
+                        category: row.category,
+                        date: row.date,
+                        image: row.image,
+                        description: row.description,
+                        cpName: row.cp_name,
+                        whatsapp: row.whatsapp,
+                        link: row.link
+                    }));
+                    savePostersToLocalCache();
+                    renderPosters();
+                    if (manualTrigger) showToast(`Sinkronisasi selesai (${posters.length} poster)!`, "success");
+                }
+            } catch (err) {
+                console.error("Cloud Fetch Posters Error:", err);
+                if (manualTrigger) showToast("Gagal terhubung ke Supabase. Cek URL/Key & RLS Policy.", "error");
+            }
+        }
+
+        async function fetchVideosFromCloud(manualTrigger = false) {
+            if (!isCloudConfigured()) return;
+            try {
+                const endpoint = `${SUPABASE_CONFIG.URL}/rest/v1/${SUPABASE_CONFIG.VIDEO_TABLE}?select=*&order=id.desc`;
+                const response = await fetch(endpoint, { method: "GET", headers: getSupabaseHeaders() });
+                if (!response.ok) return;
+                const data = await response.json();
+
+                if (Array.isArray(data)) {
+                    videos = data.map(row => ({
+                        id: Number(row.id),
+                        title: row.title,
+                        topic: row.topic,
+                        date: row.date,
+                        videoUrl: row.video_url,
+                        thumbnail: row.thumbnail || "",
+                        speaker: row.speaker,
+                        description: row.description
+                    }));
+                    saveVideosToLocalCache();
+                    renderVideos();
+                }
+            } catch (err) {
+                console.warn("Tabel videos belum tersedia di cloud, memakai cache lokal.");
+            }
+        }
+
+        async function upsertPosterToCloud(posterObj) {
+            if (!isCloudConfigured()) return true;
+            try {
+                const payload = {
+                    id: posterObj.id,
+                    title: posterObj.title,
+                    category: posterObj.category,
+                    date: posterObj.date,
+                    image: posterObj.image,
+                    description: posterObj.description,
+                    cp_name: posterObj.cpName,
+                    whatsapp: posterObj.whatsapp,
+                    link: posterObj.link
+                };
+                const endpoint = `${SUPABASE_CONFIG.URL}/rest/v1/${SUPABASE_CONFIG.TABLE}`;
+                const response = await authorizedCloudRequest(endpoint, {
+                    method: "POST",
+                    headers: { "Prefer": "resolution=merge-duplicates" },
+                    body: JSON.stringify(payload)
+                });
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                return true;
+            } catch (err) {
+                console.error("Cloud Save Poster Error:", err);
+                showToast("Gagal menyimpan ke server cloud!", "error");
+                return false;
+            }
+        }
+
+        async function deletePosterFromCloud(posterId) {
+            if (!isCloudConfigured()) return true;
+            try {
+                const endpoint = `${SUPABASE_CONFIG.URL}/rest/v1/${SUPABASE_CONFIG.TABLE}?id=eq.${posterId}`;
+                const response = await authorizedCloudRequest(endpoint, { method: "DELETE" });
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                return true;
+            } catch (err) {
+                console.error("Cloud Delete Poster Error:", err);
+                showToast("Gagal menghapus dari server cloud.", "error");
+                return false;
+            }
+        }
+
+        async function upsertVideoToCloud(videoObj) {
+            if (!isCloudConfigured()) return true;
+            try {
+                const payload = {
+                    id: videoObj.id,
+                    title: videoObj.title,
+                    topic: videoObj.topic,
+                    date: videoObj.date,
+                    video_url: videoObj.videoUrl,
+                    thumbnail: videoObj.thumbnail || "",
+                    speaker: videoObj.speaker,
+                    description: videoObj.description
+                };
+                const endpoint = `${SUPABASE_CONFIG.URL}/rest/v1/${SUPABASE_CONFIG.VIDEO_TABLE}`;
+                const response = await authorizedCloudRequest(endpoint, {
+                    method: "POST",
+                    headers: { "Prefer": "resolution=merge-duplicates" },
+                    body: JSON.stringify(payload)
+                });
+                return response.ok;
+            } catch (err) {
+                return false;
+            }
+        }
+
+        async function deleteVideoFromCloud(videoId) {
+            if (!isCloudConfigured()) return true;
+            try {
+                const endpoint = `${SUPABASE_CONFIG.URL}/rest/v1/${SUPABASE_CONFIG.VIDEO_TABLE}?id=eq.${videoId}`;
+                const response = await authorizedCloudRequest(endpoint, { method: "DELETE" });
+                return response.ok;
+            } catch (err) {
+                return false;
+            }
+        }
+
+        // =================================================================
+        // CACHE LOKAL (POSTER & VIDEO)
+        // =================================================================
+        function loadPostersFromLocalCache() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEYS.POSTERS);
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        posters = parsed;
+                        return;
+                    }
+                }
+                posters = [...defaultPosters];
+            } catch (e) { posters = [...defaultPosters]; }
+        }
+
+        function savePostersToLocalCache() {
+            try { localStorage.setItem(STORAGE_KEYS.POSTERS, JSON.stringify(posters)); } catch (e) {}
+        }
+
+        function loadVideosFromLocalCache() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEYS.VIDEOS);
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    if (Array.isArray(parsed)) {
+                        videos = parsed;
+                        return;
+                    }
+                }
+                videos = [...defaultVideos];
+            } catch (e) { videos = [...defaultVideos]; }
+        }
+
+        function saveVideosToLocalCache() {
+            try { localStorage.setItem(STORAGE_KEYS.VIDEOS, JSON.stringify(videos)); } catch (e) {}
+        }
+
+        // =================================================================
+        // SMART SEARCH ENGINE & FEATURE SUGGESTIONS
+        // =================================================================
+        function handleSearchInput(value) {
+            searchQuery = value;
+            const dInput = document.getElementById("search-input");
+            const mInput = document.getElementById("search-input-mobile");
+            const dClear = document.getElementById("clear-search-desktop");
+            const mClear = document.getElementById("clear-search-mobile");
+
+            if (dInput && dInput.value !== value) dInput.value = value;
+            if (mInput && mInput.value !== value) mInput.value = value;
+
+            if (value.trim().length > 0) {
+                if (dClear) dClear.classList.remove("hidden");
+                if (mClear) mClear.classList.remove("hidden");
+            } else {
+                if (dClear) dClear.classList.add("hidden");
+                if (mClear) mClear.classList.add("hidden");
+            }
+
+            renderSearchSuggestions();
+            renderPosters();
+            renderVideos();
+        }
+
+        function clearSearchInput() {
+            searchQuery = "";
+            const dInput = document.getElementById("search-input");
+            const mInput = document.getElementById("search-input-mobile");
+            const dClear = document.getElementById("clear-search-desktop");
+            const mClear = document.getElementById("clear-search-mobile");
+
+            if (dInput) dInput.value = "";
+            if (mInput) mInput.value = "";
+            if (dClear) dClear.classList.add("hidden");
+            if (mClear) mClear.classList.add("hidden");
+
+            hideSearchSuggestions();
+            renderPosters();
+            renderVideos();
+        }
+
+        function hideSearchSuggestions() {
+            const dBox = document.getElementById("search-suggestions-desktop");
+            const mBox = document.getElementById("search-suggestions-mobile");
+            if (dBox) dBox.classList.add("hidden");
+            if (mBox) mBox.classList.add("hidden");
+        }
+
+        function renderSearchSuggestions() {
+            const q = searchQuery.trim().toLowerCase();
+            const dBox = document.getElementById("search-suggestions-desktop");
+            const mBox = document.getElementById("search-suggestions-mobile");
+
+            if (!q) {
+                hideSearchSuggestions();
+                return;
+            }
+
+            const matchedFeatures = FEATURE_DIRECTORY.filter(feat => 
+                feat.title.toLowerCase().includes(q) ||
+                feat.subtitle.toLowerCase().includes(q) ||
+                feat.keywords.some(kw => kw.includes(q) || (q.length >= 3 && q.includes(kw)))
+            ).slice(0, 4);
+
+            const matchedPosters = posters.filter(p => 
+                p.title.toLowerCase().includes(q) ||
+                p.description.toLowerCase().includes(q) ||
+                p.cpName.toLowerCase().includes(q) ||
+                p.category.toLowerCase().includes(q)
+            ).slice(0, 3);
+
+            const matchedVideos = videos.filter(v => 
+                v.title.toLowerCase().includes(q) ||
+                v.description.toLowerCase().includes(q) ||
+                v.topic.toLowerCase().includes(q) ||
+                v.speaker.toLowerCase().includes(q)
+            ).slice(0, 3);
+
+            let html = `<div class="max-h-[60vh] sm:max-h-96 overflow-y-auto divide-y divide-slate-100">`;
+
+            if (matchedFeatures.length === 0 && matchedPosters.length === 0 && matchedVideos.length === 0) {
+                html += `
+                    <div class="p-4 text-center text-xs text-slate-500">
+                        <i class="fa-solid fa-magnifying-glass text-slate-300 text-base mb-1 block"></i>
+                        Tidak ada fitur atau konten yang cocok dengan "<strong>${escapeHtml(searchQuery)}</strong>"
+                    </div>`;
+            } else {
+                if (matchedFeatures.length > 0) {
+                    html += `<div class="p-2 bg-slate-50/80"><p class="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">Saran Fitur & Navigasi</p>`;
+                    matchedFeatures.forEach((feat, idx) => {
+                        html += `
+                            <button type="button" onclick="triggerFeatureSuggestion(${idx})" class="w-full text-left px-2.5 py-2.5 rounded-xl hover:bg-red-50 active:bg-red-50 flex items-center justify-between gap-2.5 transition group">
+                                <div class="flex items-center gap-2.5 min-w-0">
+                                    <div class="w-8 h-8 rounded-lg bg-white border border-slate-200 text-[#FF0000] group-hover:bg-[#FF0000] group-hover:text-white flex items-center justify-center shrink-0 transition">
+                                        <i class="fa-solid ${feat.icon} text-xs"></i>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <p class="text-xs font-bold text-slate-900 group-hover:text-[#FF0000] truncate">${feat.title}</p>
+                                        <p class="text-[11px] text-slate-500 truncate">${feat.subtitle}</p>
+                                    </div>
+                                </div>
+                                <span class="text-[10px] font-semibold px-2 py-0.5 rounded bg-white border border-slate-200 text-slate-600 shrink-0">${feat.badge}</span>
+                            </button>`;
+                    });
+                    html += `</div>`;
+                }
+
+                if (matchedPosters.length > 0) {
+                    html += `<div class="p-2"><p class="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">Poster Informasi</p>`;
+                    matchedPosters.forEach(p => {
+                        html += `
+                            <button type="button" onclick="selectPosterFromSearch(${p.id})" class="w-full text-left px-2.5 py-2 rounded-xl hover:bg-slate-100 active:bg-slate-100 flex items-center gap-2.5 transition">
+                                <img src="${p.image}" class="w-8 h-10 object-cover rounded border border-slate-200 shrink-0 bg-slate-900">
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-xs font-semibold text-slate-900 truncate">${escapeHtml(p.title)}</p>
+                                    <p class="text-[11px] text-[#FF0000] font-medium truncate">${escapeHtml(p.category)} • CP: ${escapeHtml(p.cpName)}</p>
+                                </div>
+                            </button>`;
+                    });
+                    html += `</div>`;
+                }
+
+                if (matchedVideos.length > 0) {
+                    html += `<div class="p-2"><p class="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">Video Edukasi & Funfact</p>`;
+                    matchedVideos.forEach(v => {
+                        html += `
+                            <button type="button" onclick="selectVideoFromSearch(${v.id})" class="w-full text-left px-2.5 py-2 rounded-xl hover:bg-slate-100 active:bg-slate-100 flex items-center gap-2.5 transition">
+                                <div class="w-8 h-8 rounded-lg bg-red-50 text-[#FF0000] flex items-center justify-center shrink-0">
+                                    <i class="fa-solid fa-play text-xs"></i>
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-xs font-semibold text-slate-900 truncate">${escapeHtml(v.title)}</p>
+                                    <p class="text-[11px] text-slate-500 truncate">${escapeHtml(v.topic)} • ${escapeHtml(v.speaker)}</p>
+                                </div>
+                            </button>`;
+                    });
+                    html += `</div>`;
+                }
+            }
+
+            html += `</div>`;
+            window._currentMatchedFeatures = matchedFeatures;
+
+            if (dBox) { dBox.innerHTML = html; dBox.classList.remove("hidden"); }
+            if (mBox) { mBox.innerHTML = html; mBox.classList.remove("hidden"); }
+        }
+
+        function triggerFeatureSuggestion(index) {
+            const feat = (window._currentMatchedFeatures || [])[index];
+            hideSearchSuggestions();
+            if (feat && typeof feat.action === "function") {
+                feat.action();
+            }
+        }
+
+        function selectPosterFromSearch(posterId) {
+            hideSearchSuggestions();
+            if (activeView !== "posters") {
+                setActiveCategory("Semua", false);
+            }
+            openDetailModal(posterId);
+        }
+
+        function selectVideoFromSearch(videoId) {
+            hideSearchSuggestions();
+            switchToVideoView(false);
+            openVideoPlayerModal(videoId);
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement("div");
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // =================================================================
+        // NAVIGASI VIEW (POSTER vs VIDEO EDUKASI)
+        // =================================================================
+        function switchToVideoView(closeSidebarOnMobile = true) {
+            activeView = "videos";
+
+            document.querySelectorAll(".sidebar-nav-btn").forEach(btn => {
+                btn.className = "sidebar-nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition";
+            });
+
+            const vidBtn = document.getElementById("sidebar-video-btn");
+            if (vidBtn) {
+                vidBtn.className = "w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold bg-red-50 text-[#FF0000] transition";
+            }
+
+            document.getElementById("poster-view-container").classList.add("hidden");
+            document.getElementById("video-view-container").classList.remove("hidden");
+
+            document.getElementById("breadcrumb-category").textContent = "Video Edukasi";
+            document.getElementById("main-header-title").textContent = "Video Edukasi";
+
+            renderVideos();
+            if (closeSidebarOnMobile && window.innerWidth < 1024) toggleMobileSidebar();
+        }
+
+        function setActiveCategory(category, closeSidebarOnMobile = true) {
+            activeView = "posters";
+            currentCategory = category;
+
+            const vidBtn = document.getElementById("sidebar-video-btn");
+            if (vidBtn) {
+                vidBtn.className = "w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition";
+            }
+
+            document.getElementById("video-view-container").classList.add("hidden");
+            document.getElementById("poster-view-container").classList.remove("hidden");
+            document.getElementById("main-header-title").textContent = "Informasi Digital";
+
+            document.querySelectorAll(".sidebar-nav-btn").forEach(btn => {
+                const isMatch = btn.getAttribute("data-category") === category;
+                btn.className = isMatch 
+                    ? "sidebar-nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold bg-red-50 text-[#FF0000] transition"
+                    : "sidebar-nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition";
+            });
+
+            document.querySelectorAll(".mobile-pill").forEach(pill => {
+                const isMatch = pill.getAttribute("data-category") === category;
+                pill.className = isMatch
+                    ? "mobile-pill px-3.5 py-2 rounded-xl text-xs font-semibold bg-[#FF0000] text-white whitespace-nowrap shrink-0"
+                    : "mobile-pill px-3.5 py-2 rounded-xl text-xs font-medium bg-slate-100 text-slate-700 whitespace-nowrap shrink-0";
+            });
+
+            const labelMap = {
+                "Semua": "Semua Informasi Aktif",
+                "Seminar/Workshop": "Seminar & Pelatihan",
+                "Lomba": "Lomba & Kompetisi",
+                "Lowongan/Magang": "KP, Magang & Karir",
+                "Pengumuman": "Info HIMA & Akademik"
+            };
+            document.getElementById("breadcrumb-category").textContent = labelMap[category] || category;
+            document.getElementById("section-active-title").textContent = labelMap[category] || category;
+
+            renderPosters();
+            if (closeSidebarOnMobile && window.innerWidth < 1024) toggleMobileSidebar();
+        }
+
+        // =================================================================
+        // LOGIKA VIDEO EDUKASI & FILTER EXTEND DROPDOWN
+        // =================================================================
+        function extractYouTubeId(url) {
+            if (!url) return null;
+            const regExp = /(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+            const match = url.match(regExp);
+            return match ? match[1] : null;
+        }
+
+        function extractGoogleDriveId(url) {
+            if (!url) return null;
+            const match = url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
+            return match ? match[1] : null;
+        }
+
+        function getVideoThumbnail(video) {
+            if (video.thumbnail && video.thumbnail.trim() !== "") return video.thumbnail.trim();
+            const ytId = extractYouTubeId(video.videoUrl);
+            if (ytId) return `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
+            return "https://placehold.co/640x360/0f172a/FF0000?text=VIDEO+EDUKASI+ELIN";
+        }
+
+        function toggleVideoTopicMenu() {
+            const menu = document.getElementById("video-topic-menu");
+            const chevron = document.getElementById("video-topic-chevron");
+            if (!menu) return;
+
+            if (menu.classList.contains("hidden")) {
+                menu.classList.remove("hidden");
+                if (chevron) chevron.classList.add("rotate-180");
+            } else {
+                closeVideoTopicMenu();
+            }
+        }
+
+        function closeVideoTopicMenu() {
+            const menu = document.getElementById("video-topic-menu");
+            const chevron = document.getElementById("video-topic-chevron");
+            if (menu) menu.classList.add("hidden");
+            if (chevron) chevron.classList.remove("rotate-180");
+        }
+
+        function setVideoTopicFilter(topic) {
+            currentVideoTopic = topic;
+
+            const labelEl = document.getElementById("active-video-topic-label");
+            if (labelEl) {
+                labelEl.textContent = topic === "Semua" ? "Semua Topik" : topic;
+            }
+
+            document.querySelectorAll(".video-topic-option").forEach(option => {
+                const isMatch = option.getAttribute("data-topic") === topic;
+                const checkIcon = option.querySelector(".fa-check");
+                option.className = isMatch
+                    ? "video-topic-option w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold bg-red-50 text-[#FF0000] transition mt-0.5 first:mt-0"
+                    : "video-topic-option w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium text-slate-700 hover:bg-slate-100 transition mt-0.5 first:mt-0";
+                if (checkIcon) {
+                    checkIcon.classList.toggle("hidden", !isMatch);
+                }
+            });
+
+            closeVideoTopicMenu();
+            renderVideos();
+        }
+
+        function resetVideoFilters() {
+            clearSearchInput();
+            setVideoTopicFilter("Semua");
+        }
+
+        function handleLocalVideoFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const maxSizeMB = 5;
+            if (file.size > maxSizeMB * 1024 * 1024) {
+                showToast(`Ukuran video melebihi ${maxSizeMB} MB! Upload ke YouTube/Drive lalu tempel link-nya.`, "error");
+                event.target.value = "";
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById("vid-input-url").value = e.target.result;
+                document.getElementById("vid-file-status").classList.remove("hidden");
+                showToast("File video lokal berhasil dimuat!", "success");
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function handleVideoThumbUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement("canvas");
+                    let w = img.width, h = img.height;
+                    if (w > 800) { h = Math.round((h * 800) / w); w = 800; }
+                    canvas.width = w; canvas.height = h;
+                    canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+                    document.getElementById("vid-input-thumb").value = canvas.toDataURL("image/jpeg", 0.78);
+                    showToast("Thumbnail kustom siap!", "success");
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function renderVideos() {
+            const countBadge = document.getElementById("count-videos");
+            if (countBadge) countBadge.textContent = videos.length;
+
+            const grid = document.getElementById("video-grid");
+            const emptyState = document.getElementById("video-empty-state");
+            const countEl = document.getElementById("video-count");
+            const crossBanner = document.getElementById("cross-search-banner-video");
+            const crossText = document.getElementById("cross-search-text-video");
+            if (!grid) return;
+
+            const q = searchQuery.trim().toLowerCase();
+            const filtered = videos.filter(vid => {
+                const matchTopic = currentVideoTopic === "Semua" || vid.topic === currentVideoTopic;
+                const matchSearch = !q ||
+                                    vid.title.toLowerCase().includes(q) ||
+                                    vid.description.toLowerCase().includes(q) ||
+                                    vid.speaker.toLowerCase().includes(q) ||
+                                    vid.topic.toLowerCase().includes(q);
+                return matchTopic && matchSearch;
+            });
+
+            if (crossBanner && crossText) {
+                const matchedPosterCount = q ? posters.filter(p =>
+                    p.title.toLowerCase().includes(q) || p.description.toLowerCase().includes(q)
+                ).length : 0;
+
+                if (q && matchedPosterCount > 0) {
+                    crossText.textContent = `Ditemukan ${matchedPosterCount} poster informasi yang cocok dengan "${searchQuery}".`;
+                    crossBanner.classList.remove("hidden");
+                } else {
+                    crossBanner.classList.add("hidden");
+                }
+            }
+
+            if (countEl) countEl.textContent = filtered.length;
+            grid.innerHTML = "";
+
+            if (filtered.length === 0) {
+                grid.classList.add("hidden");
+                emptyState.classList.remove("hidden");
+                return;
+            }
+
+            grid.classList.remove("hidden");
+            emptyState.classList.add("hidden");
+
+            filtered.forEach(vid => {
+                const thumb = getVideoThumbnail(vid);
+                const card = document.createElement("article");
+                card.className = "group bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs hover:shadow-lg hover:border-[#FF0000] active:scale-[0.99] transition-all cursor-pointer flex flex-col relative";
+                card.onclick = () => openVideoPlayerModal(vid.id);
+
+                const adminControls = isAdminLoggedIn ? `
+                    <div class="absolute top-2.5 right-2.5 z-20 flex gap-1.5" onclick="event.stopPropagation()">
+                        <button type="button" onclick="openVideoFormModal(${vid.id})" class="w-8 h-8 rounded-lg bg-amber-500 text-white flex items-center justify-center shadow" title="Edit Video"><i class="fa-solid fa-pen text-xs"></i></button>
+                        <button type="button" onclick="deleteVideo(${vid.id})" class="w-8 h-8 rounded-lg bg-[#FF0000] text-white flex items-center justify-center shadow" title="Hapus Video"><i class="fa-regular fa-trash-can text-xs"></i></button>
+                    </div>` : "";
+
+                card.innerHTML = `
+                    ${adminControls}
+                    <div class="relative aspect-video w-full bg-slate-900 overflow-hidden">
+                        <img src="${thumb}" alt="${escapeHtml(vid.title)}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-90">
+                        <div class="absolute inset-0 bg-slate-950/30 group-hover:bg-slate-950/10 transition flex items-center justify-center">
+                            <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#FF0000] text-white flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                                <i class="fa-solid fa-play text-sm sm:text-base ml-0.5"></i>
+                            </div>
+                        </div>
+                        <span class="absolute bottom-2 left-2 sm:bottom-2.5 sm:left-2.5 px-2.5 py-0.5 rounded-md bg-slate-900/85 text-white text-[10px] font-semibold backdrop-blur-xs">
+                            ${escapeHtml(vid.topic)}
+                        </span>
+                    </div>
+                    <div class="p-3.5 sm:p-4 flex-grow flex flex-col justify-between bg-white">
+                        <div>
+                            <h3 class="font-bold text-slate-900 text-xs sm:text-sm line-clamp-2 group-hover:text-[#FF0000] transition leading-snug">${escapeHtml(vid.title)}</h3>
+                            <p class="text-[11px] sm:text-xs text-slate-500 line-clamp-2 mt-1.5 leading-relaxed">${escapeHtml(vid.description)}</p>
+                        </div>
+                        <div class="mt-3 sm:mt-4 pt-2.5 sm:pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] sm:text-xs text-slate-500">
+                            <span class="truncate pr-2"><i class="fa-solid fa-user-graduate text-[#FF0000] mr-1"></i> ${escapeHtml(vid.speaker)}</span>
+                            <span class="text-[#FF0000] font-bold shrink-0">Tonton →</span>
+                        </div>
+                    </div>`;
+                grid.appendChild(card);
+            });
+        }
+
+        function openVideoPlayerModal(id) {
+            const vid = videos.find(v => v.id === id);
+            if (!vid) return;
+
+            document.getElementById("player-video-topic").textContent = vid.topic;
+            document.getElementById("player-video-title").textContent = vid.title;
+            document.getElementById("player-video-speaker").textContent = vid.speaker;
+            document.getElementById("player-video-date").innerHTML = `<i class="fa-regular fa-calendar mr-1"></i> ${vid.date}`;
+            document.getElementById("player-video-desc").textContent = vid.description;
+
+            const iframe = document.getElementById("player-iframe");
+            const nativeVideo = document.getElementById("player-native-video");
+
+            iframe.classList.add("hidden");
+            iframe.src = "";
+            nativeVideo.classList.add("hidden");
+            nativeVideo.pause();
+            nativeVideo.src = "";
+
+            const ytId = extractYouTubeId(vid.videoUrl);
+            const driveId = extractGoogleDriveId(vid.videoUrl);
+
+            if (ytId) {
+                iframe.src = `https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0`;
+                iframe.classList.remove("hidden");
+            } else if (driveId) {
+                iframe.src = `https://drive.google.com/file/d/${driveId}/preview`;
+                iframe.classList.remove("hidden");
+            } else {
+                nativeVideo.src = vid.videoUrl;
+                nativeVideo.classList.remove("hidden");
+                nativeVideo.play().catch(() => {});
+            }
+
+            document.getElementById("video-player-modal").classList.remove("hidden");
+        }
+
+        function closeVideoPlayerModal() {
+            const iframe = document.getElementById("player-iframe");
+            const nativeVideo = document.getElementById("player-native-video");
+            if (iframe) { iframe.src = ""; iframe.classList.add("hidden"); }
+            if (nativeVideo) { nativeVideo.pause(); nativeVideo.src = ""; nativeVideo.classList.add("hidden"); }
+            document.getElementById("video-player-modal").classList.add("hidden");
+        }
+
+        function openVideoFormModal(editId = null) {
+            if (!isAdminLoggedIn) { openLoginModal(); return; }
+            document.getElementById("video-form").reset();
+            document.getElementById("vid-file-status").classList.add("hidden");
+            document.getElementById("edit-video-id").value = "";
+
+            if (editId) {
+                const vid = videos.find(v => v.id === editId);
+                if (vid) {
+                    document.getElementById("video-form-modal-title").textContent = "Edit Video Edukasi";
+                    document.getElementById("edit-video-id").value = vid.id;
+                    document.getElementById("vid-input-title").value = vid.title;
+                    document.getElementById("vid-input-topic").value = vid.topic;
+                    document.getElementById("vid-input-speaker").value = vid.speaker;
+                    document.getElementById("vid-input-url").value = vid.videoUrl;
+                    document.getElementById("vid-input-thumb").value = vid.thumbnail || "";
+                    document.getElementById("vid-input-desc").value = vid.description;
+                }
+            } else {
+                document.getElementById("video-form-modal-title").textContent = "Tambah Video Edukasi Baru";
+            }
+            document.getElementById("video-form-modal").classList.remove("hidden");
+        }
+
+        function closeVideoFormModal() {
+            document.getElementById("video-form-modal").classList.add("hidden");
+        }
+
+        async function handleVideoFormSubmit(e) {
+            e.preventDefault();
+            if (!isAdminLoggedIn) return;
+
+            const btnSubmit = document.getElementById("btn-submit-video");
+            const originalText = btnSubmit.innerHTML;
+            btnSubmit.disabled = true;
+            btnSubmit.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i> Menyimpan...`;
+
+            const editId = document.getElementById("edit-video-id").value;
+            const title = document.getElementById("vid-input-title").value.trim();
+            const topic = document.getElementById("vid-input-topic").value;
+            const speaker = document.getElementById("vid-input-speaker").value.trim();
+            const rawUrl = document.getElementById("vid-input-url").value.trim();
+            const videoUrl = rawUrl.startsWith("data:") ? rawUrl : normalizeUrl(rawUrl);
+            const thumbnail = document.getElementById("vid-input-thumb").value.trim();
+            const description = document.getElementById("vid-input-desc").value.trim();
+
+            let targetVideo;
+            if (editId) {
+                const idx = videos.findIndex(v => v.id === Number(editId));
+                if (idx !== -1) {
+                    targetVideo = { ...videos[idx], title, topic, speaker, videoUrl, thumbnail, description };
+                    videos[idx] = targetVideo;
+                }
+            } else {
+                const today = new Date();
+                const months = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+                targetVideo = {
+                    id: Date.now(),
+                    title,
+                    topic,
+                    date: `${today.getDate()} ${months[today.getMonth()]} ${today.getFullYear()}`,
+                    videoUrl,
+                    thumbnail,
+                    speaker,
+                    description
+                };
+                videos.unshift(targetVideo);
+            }
+
+            const ok = await upsertVideoToCloud(targetVideo);
+            if (ok) {
+                saveVideosToLocalCache();
+                closeVideoFormModal();
+                switchToVideoView(false);
+                showToast(editId ? "Video berhasil diperbarui!" : "Video edukasi baru ditambahkan!", "success");
+            } else {
+                showToast("Gagal menyimpan video ke cloud. Pastikan sesi admin aktif.", "error");
+            }
+
+            btnSubmit.disabled = false;
+            btnSubmit.innerHTML = originalText;
+        }
+
+        async function deleteVideo(id) {
+            if (!isAdminLoggedIn) return;
+            const ok = await deleteVideoFromCloud(id);
+            if (ok) {
+                videos = videos.filter(v => v.id !== id);
+                saveVideosToLocalCache();
+                renderVideos();
+                showToast("Video berhasil dihapus.", "success");
+            }
+        }
+
+        // =================================================================
+        // POSTER CRUD & UI HANDLERS
+        // =================================================================
+        async function handlePosterFormSubmit(e) {
+            e.preventDefault();
+            if (!isAdminLoggedIn) return;
+
+            const btnSubmit = document.getElementById("btn-submit-poster");
+            const originalText = btnSubmit.innerHTML;
+            btnSubmit.disabled = true;
+            btnSubmit.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i> Menyimpan ke Cloud...`;
+
+            const editId = document.getElementById("edit-poster-id").value;
+            const title = document.getElementById("input-title").value.trim();
+            const category = document.getElementById("input-category").value;
+            const image = document.getElementById("input-image").value.trim();
+            const description = document.getElementById("input-desc").value.trim();
+            const cpName = document.getElementById("input-cp").value.trim();
+            const whatsapp = formatWhatsAppNumber(document.getElementById("input-wa").value.trim());
+            const link = normalizeUrl(document.getElementById("input-link").value.trim());
+
+            let targetPoster;
+
+            if (editId) {
+                const idx = posters.findIndex(p => p.id === Number(editId));
+                if (idx !== -1) {
+                    targetPoster = { ...posters[idx], title, category, image, description, cpName, whatsapp, link };
+                    posters[idx] = targetPoster;
+                }
+            } else {
+                const today = new Date();
+                const months = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+                targetPoster = {
+                    id: Date.now(),
+                    title,
+                    category,
+                    date: `${today.getDate()} ${months[today.getMonth()]} ${today.getFullYear()}`,
+                    image,
+                    description,
+                    cpName,
+                    whatsapp,
+                    link
+                };
+                posters.unshift(targetPoster);
+            }
+
+            const cloudSuccess = await upsertPosterToCloud(targetPoster);
+            
+            btnSubmit.disabled = false;
+            btnSubmit.innerHTML = originalText;
+
+            if (cloudSuccess) {
+                savePostersToLocalCache();
+                closePosterFormModal();
+                setActiveCategory(currentCategory, false);
+                showToast(editId ? "Perubahan tersimpan & langsung tayang!" : "Poster baru dipublikasikan!", "success");
+            }
+        }
+
+        async function deletePoster(id) {
+            if (!isAdminLoggedIn) return;
+            showToast("Menghapus poster...", "info");
+            const cloudSuccess = await deletePosterFromCloud(id);
+            
+            if (cloudSuccess) {
+                posters = posters.filter(p => p.id !== id);
+                savePostersToLocalCache();
+                closeDetailModal();
+                renderPosters();
+                showToast("Poster berhasil dihapus.", "success");
+            }
+        }
+
+        function toggleMobileSidebar() {
+            const sidebar = document.getElementById("app-sidebar");
+            const backdrop = document.getElementById("sidebar-backdrop");
+            if (sidebar.classList.contains("-translate-x-full")) {
+                sidebar.classList.remove("-translate-x-full");
+                backdrop.classList.remove("hidden");
+            } else {
+                sidebar.classList.add("-translate-x-full");
+                backdrop.classList.add("hidden");
+            }
+        }
+
+        function selectCategoryFromCard(category) {
+            setActiveCategory(category);
+            document.getElementById("section-active-title").scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
+
+        function updateDashboardCounters() {
+            document.getElementById("count-all").textContent = posters.length;
+            document.getElementById("count-seminar").textContent = posters.filter(p => p.category === "Seminar/Workshop").length;
+            document.getElementById("count-lomba").textContent = posters.filter(p => p.category === "Lomba").length;
+            document.getElementById("count-magang").textContent = posters.filter(p => p.category === "Lowongan/Magang").length;
+            document.getElementById("count-pengumuman").textContent = posters.filter(p => p.category === "Pengumuman").length;
+
+            document.getElementById("stat-total").textContent = posters.length;
+            document.getElementById("stat-seminar").textContent = posters.filter(p => p.category === "Seminar/Workshop").length;
+            document.getElementById("stat-lomba").textContent = posters.filter(p => p.category === "Lomba").length;
+            document.getElementById("stat-magang").textContent = posters.filter(p => p.category === "Lowongan/Magang").length;
+        }
+
+        function handleSecretLogoTap() {
+            if (isAdminLoggedIn) return;
+            logoTapCount++;
+            clearTimeout(logoTapTimer);
+            if (logoTapCount >= 5) {
+                logoTapCount = 0;
+                openLoginModal();
+            } else {
+                logoTapTimer = setTimeout(() => { logoTapCount = 0; }, 1500);
+            }
+        }
+
+        function loadAdminState() {
+            try {
+                const rawSession = sessionStorage.getItem(STORAGE_KEYS.ADMIN_SESSION);
+                if (rawSession) {
+                    const parsed = JSON.parse(rawSession);
+                    if (parsed && parsed.access_token) {
+                        adminAuthSession = parsed;
+                        isAdminLoggedIn = true;
+                    }
+                }
+            } catch (e) {
+                adminAuthSession = null;
+                isAdminLoggedIn = false;
+            }
+            updateAdminUI();
+        }
+
+        function updateAdminUI() {
+            const adminToolbar = document.getElementById("admin-toolbar");
+            const modalAdminActions = document.getElementById("modal-admin-actions");
+            const btnAddVideoInline = document.getElementById("btn-add-video-inline");
+            const roleTitle = document.getElementById("sidebar-role-title");
+            const roleSubtitle = document.getElementById("sidebar-role-subtitle");
+            const avatarBadge = document.getElementById("user-avatar-badge");
+
+            if (isAdminLoggedIn) {
+                if (adminToolbar) { adminToolbar.classList.remove("hidden"); adminToolbar.classList.add("flex"); }
+                if (modalAdminActions) modalAdminActions.classList.remove("hidden");
+                if (btnAddVideoInline) btnAddVideoInline.classList.remove("hidden");
+                if (roleTitle) roleTitle.textContent = "Admin Dep. RISTEK";
+                if (roleSubtitle) roleSubtitle.textContent = adminAuthSession?.email || "HIMA ELIN PENS";
+                if (avatarBadge) avatarBadge.innerHTML = '<i class="fa-solid fa-shield-halved"></i>';
+            } else {
+                if (adminToolbar) { adminToolbar.classList.add("hidden"); adminToolbar.classList.remove("flex"); }
+                if (modalAdminActions) modalAdminActions.classList.add("hidden");
+                if (btnAddVideoInline) btnAddVideoInline.classList.add("hidden");
+                if (roleTitle) roleTitle.textContent = "Mahasiswa & Umum";
+                if (roleSubtitle) roleSubtitle.textContent = "Teknik Elektro Industri";
+                if (avatarBadge) avatarBadge.innerHTML = '<i class="fa-solid fa-bolt"></i>';
+            }
+            if (typeof posters !== 'undefined' && posters.length > 0) renderPosters();
+            if (typeof videos !== 'undefined' && videos.length > 0) renderVideos();
+        }
+
+        function openLoginModal() {
+            document.getElementById("login-modal").classList.remove("hidden");
+            document.getElementById("admin-password-input").value = "";
+            setTimeout(() => document.getElementById("admin-email-input").focus(), 100);
+        }
+
+        function closeLoginModal() { document.getElementById("login-modal").classList.add("hidden"); }
+
+        function togglePasswordVisibility() {
+            const input = document.getElementById("admin-password-input");
+            const icon = document.getElementById("eye-icon");
+            if (input.type === "password") { input.type = "text"; icon.classList.replace("fa-eye", "fa-eye-slash"); }
+            else { input.type = "password"; icon.classList.replace("fa-eye-slash", "fa-eye"); }
+        }
+
+        function logoutAdmin(sessionExpired = false) {
+            if (isCloudConfigured() && adminAuthSession?.access_token) {
+                fetch(`${SUPABASE_CONFIG.URL}/auth/v1/logout`, {
+                    method: "POST",
+                    headers: getSupabaseHeaders({}, true)
+                }).catch(() => {});
+            }
+            isAdminLoggedIn = false;
+            adminAuthSession = null;
+            sessionStorage.removeItem(STORAGE_KEYS.ADMIN_SESSION);
+            updateAdminUI();
+            closeDetailModal();
+            showToast(sessionExpired ? "Sesi admin habis, silakan login kembali." : "Mode Admin dinonaktifkan.", "info");
+        }
+
+        function exportDataJSON() {
+            const backupPayload = { posters, videos };
+            const dataStr = JSON.stringify(backupPayload, null, 2);
+            const blob = new Blob([dataStr], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url; a.download = `hima-elin-backup.json`;
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast("File JSON (Poster & Video) diunduh!", "success");
+        }
+
+        async function importDataJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    if (Array.isArray(imported)) {
+                        posters = imported;
+                        savePostersToLocalCache();
+                        for (const p of posters) await upsertPosterToCloud(p);
+                        renderPosters();
+                        closeDataSyncModal();
+                        showToast(`Berhasil mengimpor ${imported.length} poster!`, "success");
+                    } else if (imported && Array.isArray(imported.posters)) {
+                        posters = imported.posters;
+                        videos = Array.isArray(imported.videos) ? imported.videos : videos;
+                        savePostersToLocalCache();
+                        saveVideosToLocalCache();
+                        for (const p of posters) await upsertPosterToCloud(p);
+                        for (const v of videos) await upsertVideoToCloud(v);
+                        renderPosters();
+                        renderVideos();
+                        closeDataSyncModal();
+                        showToast(`Berhasil mengimpor poster & video!`, "success");
+                    }
+                } catch (err) { showToast("Format file salah.", "error"); }
+            };
+            reader.readAsText(file);
+        }
+
+        function openDataSyncModal() { document.getElementById("sync-modal").classList.remove("hidden"); }
+        function closeDataSyncModal() { document.getElementById("sync-modal").classList.add("hidden"); }
+
+        function handleImageFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement("canvas");
+                    let w = img.width, h = img.height;
+                    if (w > 900) { h = Math.round((h * 900) / w); w = 900; }
+                    canvas.width = w; canvas.height = h;
+                    canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+                    const compressed = canvas.toDataURL("image/jpeg", 0.78);
+                    document.getElementById("input-image").value = compressed;
+                    document.getElementById("compression-preview-thumb").src = compressed;
+                    document.getElementById("compression-stats").classList.remove("hidden");
+                    showToast("Gambar berhasil dikompresi!", "success");
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function renderPosters() {
+            updateDashboardCounters();
+            const grid = document.getElementById("poster-grid");
+            const emptyState = document.getElementById("empty-state");
+            const countEl = document.getElementById("poster-count");
+            const crossBanner = document.getElementById("cross-search-banner-poster");
+            const crossText = document.getElementById("cross-search-text-poster");
+
+            const q = searchQuery.trim().toLowerCase();
+            const filtered = posters.filter(poster => {
+                const matchCategory = currentCategory === "Semua" || poster.category === currentCategory;
+                const matchSearch = !q ||
+                                    poster.title.toLowerCase().includes(q) ||
+                                    poster.description.toLowerCase().includes(q) ||
+                                    poster.cpName.toLowerCase().includes(q) ||
+                                    poster.category.toLowerCase().includes(q);
+                return matchCategory && matchSearch;
+            });
+
+            if (crossBanner && crossText) {
+                const matchedVideoCount = q ? videos.filter(v =>
+                    v.title.toLowerCase().includes(q) ||
+                    v.description.toLowerCase().includes(q) ||
+                    v.topic.toLowerCase().includes(q)
+                ).length : 0;
+
+                if (q && matchedVideoCount > 0) {
+                    crossText.textContent = `Ditemukan ${matchedVideoCount} video edukasi yang cocok dengan "${searchQuery}".`;
+                    crossBanner.classList.remove("hidden");
+                } else {
+                    crossBanner.classList.add("hidden");
+                }
+            }
+
+            countEl.textContent = filtered.length;
+            grid.innerHTML = "";
+
+            if (filtered.length === 0) {
+                grid.classList.add("hidden");
+                emptyState.classList.remove("hidden");
+                return;
+            }
+
+            grid.classList.remove("hidden");
+            emptyState.classList.add("hidden");
+
+            filtered.forEach(poster => {
+                const card = document.createElement("article");
+                card.className = "group bg-white rounded-xl sm:rounded-2xl border border-slate-200 overflow-hidden shadow-xs hover:shadow-lg hover:border-[#FF0000] active:scale-[0.99] transition-all cursor-pointer flex flex-col relative";
+                card.onclick = () => openDetailModal(poster.id);
+
+                const adminControls = isAdminLoggedIn ? `
+                    <div class="absolute top-2 right-2 sm:top-3 sm:right-3 z-20 flex gap-1 sm:gap-1.5" onclick="event.stopPropagation()">
+                        <button type="button" onclick="openPosterFormModal(${poster.id})" class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-amber-500 text-white flex items-center justify-center shadow"><i class="fa-solid fa-pen text-[11px] sm:text-xs"></i></button>
+                        <button type="button" onclick="deletePoster(${poster.id})" class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-[#FF0000] text-white flex items-center justify-center shadow"><i class="fa-regular fa-trash-can text-[11px] sm:text-xs"></i></button>
+                    </div>` : "";
+
+                card.innerHTML = `
+                    ${adminControls}
+                    <div class="relative aspect-[3/4] w-full bg-slate-900 overflow-hidden">
+                        <img src="${poster.image}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                    </div>
+                    <div class="p-2.5 sm:p-4 flex-grow flex flex-col justify-between bg-white">
+                        <div>
+                            <span class="text-[10px] sm:text-[11px] font-semibold text-[#FF0000] block truncate">${poster.category}</span>
+                            <h3 class="font-bold text-slate-900 text-xs sm:text-sm line-clamp-2 mt-0.5 sm:mt-1 leading-snug">${poster.title}</h3>
+                        </div>
+                        <div class="mt-2.5 sm:mt-4 pt-2 sm:pt-3 border-t border-slate-100 flex items-center justify-between gap-1 text-[11px] sm:text-xs text-slate-500">
+                            <span class="truncate"><i class="fa-regular fa-user text-[#FF0000] mr-0.5"></i> ${poster.cpName}</span>
+                            <span class="text-[#FF0000] font-bold shrink-0">Detail →</span>
+                        </div>
+                    </div>`;
+                grid.appendChild(card);
+            });
+        }
+
+        function setupEventListeners() {
+            document.querySelectorAll(".sidebar-nav-btn").forEach(btn => {
+                btn.addEventListener("click", () => setActiveCategory(btn.getAttribute("data-category")));
+            });
+            document.querySelectorAll(".mobile-pill").forEach(pill => {
+                pill.addEventListener("click", () => setActiveCategory(pill.getAttribute("data-category")));
+            });
+
+            const searchDesktop = document.getElementById("search-input");
+            const searchMobile = document.getElementById("search-input-mobile");
+
+            const handleSearchKeydown = (e) => {
+                if (e.key === "Enter") {
+                    e.preventDefault();
+                    if (window._currentMatchedFeatures && window._currentMatchedFeatures.length > 0) {
+                        triggerFeatureSuggestion(0);
+                    } else {
+                        hideSearchSuggestions();
+                    }
+                } else if (e.key === "Escape") {
+                    hideSearchSuggestions();
+                }
+            };
+
+            searchDesktop.addEventListener("input", (e) => handleSearchInput(e.target.value));
+            searchMobile.addEventListener("input", (e) => handleSearchInput(e.target.value));
+            searchDesktop.addEventListener("keydown", handleSearchKeydown);
+            searchMobile.addEventListener("keydown", handleSearchKeydown);
+            searchDesktop.addEventListener("focus", () => { if (searchQuery.trim()) renderSearchSuggestions(); });
+            searchMobile.addEventListener("focus", () => { if (searchQuery.trim()) renderSearchSuggestions(); });
+
+            // Tutup dropdown saran & filter topik saat klik di luar area
+            document.addEventListener("click", (e) => {
+                const dWrap = document.getElementById("search-wrapper-desktop");
+                const mWrap = document.getElementById("search-wrapper-mobile");
+                if (dWrap && !dWrap.contains(e.target) && mWrap && !mWrap.contains(e.target)) {
+                    hideSearchSuggestions();
+                }
+
+                const topicDrop = document.getElementById("video-topic-dropdown");
+                if (topicDrop && !topicDrop.contains(e.target)) {
+                    closeVideoTopicMenu();
+                }
+            });
+
+            // Login dengan Supabase Authentication
+            document.getElementById("login-form").addEventListener("submit", async (e) => {
+                e.preventDefault();
+                const email = document.getElementById("admin-email-input").value.trim();
+                const password = document.getElementById("admin-password-input").value;
+                const btnLogin = document.getElementById("btn-login-submit");
+
+                if (!isCloudConfigured()) {
+                    if (password === "admin123") {
+                        isAdminLoggedIn = true;
+                        adminAuthSession = { access_token: "local", email: email || "admin@lokal" };
+                        sessionStorage.setItem(STORAGE_KEYS.ADMIN_SESSION, JSON.stringify(adminAuthSession));
+                        updateAdminUI();
+                        closeLoginModal();
+                        showToast("Login berhasil! Mode Admin aktif.", "success");
+                    } else {
+                        showToast("Kata sandi salah!", "error");
+                    }
+                    return;
+                }
+
+                btnLogin.disabled = true;
+                btnLogin.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i> Memverifikasi...`;
+
+                try {
+                    await loginWithSupabaseAuth(email, password);
+                    updateAdminUI();
+                    closeLoginModal();
+                    showToast("Login berhasil! Mode Admin aktif.", "success");
+                } catch (err) {
+                    showToast(err.message || "Email atau kata sandi salah!", "error");
+                } finally {
+                    btnLogin.disabled = false;
+                    btnLogin.textContent = "Masuk";
+                }
+            });
+
+            // Ubah Password Admin (Tersinkron ke seluruh device via Supabase Auth)
+            document.getElementById("change-password-form").addEventListener("submit", async (e) => {
+                e.preventDefault();
+                const newPass = document.getElementById("new-admin-password").value.trim();
+                const btnSave = document.getElementById("btn-save-password");
+
+                if (newPass.length < 6) {
+                    showToast("Kata sandi minimal 6 karakter!", "error");
+                    return;
+                }
+
+                btnSave.disabled = true;
+                btnSave.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i> Menyimpan...`;
+
+                try {
+                    await updateSupabaseAdminPassword(newPass);
+                    e.target.reset();
+                    showToast("Password admin diperbarui & tersinkron!", "success");
+                } catch (err) {
+                    showToast(err.message || "Gagal memperbarui kata sandi.", "error");
+                } finally {
+                    btnSave.disabled = false;
+                    btnSave.textContent = "Simpan Password";
+                }
+            });
+
+            document.getElementById("poster-form").addEventListener("submit", handlePosterFormSubmit);
+            document.getElementById("video-form").addEventListener("submit", handleVideoFormSubmit);
+        }
+
+        function resetFilters() {
+            clearSearchInput();
+            setActiveCategory("Semua");
+        }
+
+        function openDetailModal(id) {
+            const poster = posters.find(p => p.id === id);
+            if (!poster) return;
+            document.getElementById("modal-poster-img").src = poster.image;
+            document.getElementById("modal-poster-category").textContent = poster.category;
+            document.getElementById("modal-poster-date").innerHTML = `<i class="fa-regular fa-calendar"></i> ${poster.date}`;
+            document.getElementById("modal-poster-title").textContent = poster.title;
+            document.getElementById("modal-poster-desc").textContent = poster.description;
+            document.getElementById("modal-poster-cp").textContent = poster.cpName;
+            document.getElementById("modal-poster-phone-display").textContent = "+" + poster.whatsapp;
+            document.getElementById("modal-btn-wa").href = `https://wa.me/${poster.whatsapp}?text=Halo%20${encodeURIComponent(poster.cpName)}`;
+            document.getElementById("modal-btn-link").href = poster.link;
+
+            const adminActions = document.getElementById("modal-admin-actions");
+            if (isAdminLoggedIn) {
+                adminActions.classList.remove("hidden");
+                document.getElementById("modal-btn-edit").onclick = () => { closeDetailModal(); openPosterFormModal(poster.id); };
+                document.getElementById("modal-btn-delete").onclick = () => deletePoster(poster.id);
+            } else {
+                adminActions.classList.add("hidden");
+            }
+            document.getElementById("detail-modal").classList.remove("hidden");
+        }
+
+        function closeDetailModal() { document.getElementById("detail-modal").classList.add("hidden"); }
+
+        function openPosterFormModal(editId = null) {
+            if (!isAdminLoggedIn) { openLoginModal(); return; }
+            document.getElementById("poster-form").reset();
+            document.getElementById("compression-stats").classList.add("hidden");
+            document.getElementById("edit-poster-id").value = "";
+
+            if (editId) {
+                const poster = posters.find(p => p.id === editId);
+                if (poster) {
+                    document.getElementById("form-modal-title").textContent = "Edit Poster";
+                    document.getElementById("edit-poster-id").value = poster.id;
+                    document.getElementById("input-title").value = poster.title;
+                    document.getElementById("input-category").value = poster.category;
+                    document.getElementById("input-image").value = poster.image;
+                    document.getElementById("input-desc").value = poster.description;
+                    document.getElementById("input-cp").value = poster.cpName;
+                    document.getElementById("input-wa").value = poster.whatsapp;
+                    document.getElementById("input-link").value = poster.link;
+                }
+            } else {
+                document.getElementById("form-modal-title").textContent = "Tambah Poster Baru";
+            }
+            document.getElementById("poster-form-modal").classList.remove("hidden");
+        }
+
+        function closePosterFormModal() { document.getElementById("poster-form-modal").classList.add("hidden"); }
+
+        function formatWhatsAppNumber(phone) {
+            let cleaned = phone.replace(/\D/g, "");
+            if (cleaned.startsWith("0")) cleaned = "62" + cleaned.substring(1);
+            else if (!cleaned.startsWith("62")) cleaned = "62" + cleaned;
+            return cleaned;
+        }
+
+        function normalizeUrl(url) {
+            if (!url) return "#";
+            if (!/^https?:\/\//i.test(url)) return "https://" + url;
+            return url;
+        }
+
+        function showToast(message, type = "success") {
+            const container = document.getElementById("toast-container");
+            const toast = document.createElement("div");
+            const iconClass = type === "error"
+                ? "fa-solid fa-circle-exclamation text-red-400"
+                : type === "info"
+                ? "fa-solid fa-circle-info text-sky-400"
+                : "fa-solid fa-circle-check text-emerald-400";
+            toast.className = `w-full sm:w-auto max-w-sm bg-slate-900 text-white px-4 py-3 rounded-xl shadow-lg text-xs sm:text-sm font-medium flex items-center gap-2.5`;
+            toast.innerHTML = `<i class="${iconClass} shrink-0"></i> <span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3200);
+        }
+    </script>
+</body>
+</html>
